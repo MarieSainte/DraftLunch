@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GO4LUNCH</string>
+    <string name="title_activity_lunch">Restaurants</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="connection_succeed">Connexion réussie</string>
+    <string name="error_authentication_canceled">Authentification annulée</string>
+    <string name="error_no_internet">Pas de connexion internet</string>
+    <string name="error_unknown_error">Erreur inconnue</string>
+    <string name="info_no_email_found">Aucun e-mail trouvé</string>
+    <string name="info_no_username_found">Aucun nom trouvé</string>
+    <string name="delete_the_account">Supprimer le compte</string>
+    <string name="Language">"Langue : "</string>
+    <string name="Lunch">Restaurants</string>
+    <string name="Settings">Paramètres</string>
+    <string name="Logout">Déconnexion</string>
+    <string name="workmates">Collègues</string>
+    <string name="list_view">Liste</string>
+    <string name="map_view">Carte</string>
+    <string name="search">Recherche</string>
+    <string name="request_perms">Go4Lunch a besoin de votre localisation pour fonctionner correctement </string>
+    <string name="googleAPI">AIzaSyBQ4HmnvZGf8vwh-IvdUe8cCUsNENidYTo</string>
+    <string name="Open_now">Ouvert</string>
+    <string name="Close">Fermé</string>
+</resources>
