@@ -4,7 +4,7 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 
-public class User {
+public class User  {
 
     private String uid;
     private String username;

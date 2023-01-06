@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.draft.draftlunch.Models.User;
 import com.draft.draftlunch.R;
+import com.draft.draftlunch.ui.ViewModelFactory;
 
 import java.util.List;
 
@@ -38,12 +39,15 @@ public class WorkmatesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
-        mViewModel.getUsers().observe(getViewLifecycleOwner(), this::updateView);
-
         recyclerView = view.findViewById(R.id.workmates_recyclerview);
         progressBar = view.findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.VISIBLE);
+
+        mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(getContext())).get(WorkmatesViewModel.class);
+        mViewModel.init();
+        mViewModel.getUsers().observe(getViewLifecycleOwner(), this::updateView);
+
+
+
 
     }
 
@@ -52,18 +56,18 @@ public class WorkmatesFragment extends Fragment {
             progressBar.setVisibility(View.GONE);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerView.setHasFixedSize(true);
-            WorkmatesAdapter workmatesAdapter = new WorkmatesAdapter(getContext(), (List<User>) mViewModel.getUsers());
+            WorkmatesAdapter workmatesAdapter = new WorkmatesAdapter(getContext(), (List<User>) users);
             recyclerView.setAdapter(workmatesAdapter);
             workmatesAdapter.notifyDataSetChanged();
+        }else{
+            progressBar.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(WorkmatesViewModel.class);
 
-        mViewModel.init();
     }
 
 

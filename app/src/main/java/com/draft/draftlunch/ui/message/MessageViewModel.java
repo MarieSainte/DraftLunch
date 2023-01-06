@@ -2,8 +2,9 @@ package com.draft.draftlunch.ui.message;
 
 import androidx.lifecycle.ViewModel;
 
-import com.draft.draftlunch.Services.RestaurantRepository;
+import com.draft.draftlunch.Services.ChatRepository;
 import com.draft.draftlunch.Services.UserRepository;
+import com.google.firebase.firestore.Query;
 
 import java.util.concurrent.Executor;
 
@@ -12,7 +13,7 @@ public class MessageViewModel extends ViewModel {
 
     private final UserRepository userSource;
 
-    private final RestaurantRepository restaurantSource;
+    private final ChatRepository chatSource;
 
     private final Executor executor;
 
@@ -21,9 +22,17 @@ public class MessageViewModel extends ViewModel {
 
     // CONSTRUCTOR
 
-    public MessageViewModel(UserRepository userSource, RestaurantRepository restaurantSource, Executor executor) {
+    public MessageViewModel(UserRepository userSource, ChatRepository chatSource, Executor executor) {
         this.userSource = userSource;
-        this.restaurantSource = restaurantSource;
+        this.chatSource = chatSource;
         this.executor = executor;
+    }
+
+    public Query getAllMessageForChat(String chat){
+        return chatSource.getAllMessageForChat(chat);
+    }
+
+    public void init() {
+
     }
 }

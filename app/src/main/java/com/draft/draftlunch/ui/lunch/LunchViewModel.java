@@ -6,7 +6,6 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.Models.User;
 import com.draft.draftlunch.Services.RestaurantRepository;
 import com.draft.draftlunch.Services.UserRepository;
@@ -39,7 +38,8 @@ public class LunchViewModel extends ViewModel {
     }
 
     public void init() {
-
+        fetchUsers();
+        restaurantSource.FetchRestaurants("48.8650,2.3540");
         if (this.user != null) {
             return;
         }
@@ -50,6 +50,8 @@ public class LunchViewModel extends ViewModel {
     // -------------
     // FOR USER
     // -------------
+
+    public void fetchUsers(){userSource.fetchUsers();}
 
     public FirebaseUser getCurrentUser() { return this.user; }
 
@@ -70,10 +72,6 @@ public class LunchViewModel extends ViewModel {
         return userSource.getUserData().continueWith(task -> task.getResult().toObject(User.class)) ;
     }
 
-    public LiveData<List<Result>> CrossDataUsersAndRestaurant(LiveData<List<Result>> allRestaurants){
-        return userSource.CrossDataUsersAndRestaurant(allRestaurants);
-    }
-
     public LiveData<List<User>> getUsers() {
         return userSource.getUsers();
     }
@@ -84,9 +82,8 @@ public class LunchViewModel extends ViewModel {
     // -------------
 
     public void fetchRestaurants(List<User> users){
-        if (users != null){
-            restaurantSource.FetchRestaurants(String.valueOf(userSource.getLocation().getLatitude()+","+userSource.getLocation().getLongitude()),users);
-
+        if (users != null && restaurantSource.getMyRestaurants().isEmpty()){
+            restaurantSource.FetchRestaurants("48.8650,2.3540");
         }
     }
 

@@ -1,6 +1,8 @@
 package com.draft.draftlunch.ui.main;
 
 
+import static android.content.ContentValues.TAG;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -79,8 +81,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         binding.btnConnexion.setOnClickListener(v -> startSignInActivity());
 
         binding.btnStart.setOnClickListener(v -> {
-            Intent intent = new Intent(this, LunchActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, LunchActivity.class));
         });
     }
 
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                         .setTheme(R.style.LoginTheme)
                         .setAvailableProviders(providers)
                         .setIsSmartLockEnabled(false, true)
-                        .setLogo(R.drawable.ic_logo_auth)
+                        .setLogo(R.drawable.meal_v3_final)
                         .build(),
                 RC_SIGN_IN);
     }
@@ -123,7 +124,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             // SUCCESS
             if (resultCode == RESULT_OK) {
                 mViewModel.createUser();
-                mViewModel.fetchUsers();
             } else {
                 // ERRORS
                 if (response == null) {
@@ -171,12 +171,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     private void setLocation(double lat, double lng) {
-        location.setLatitude(lat);
-        location.setLongitude(lng);
+        //location.setLatitude(lat);
+        //location.setLongitude(lng);
 
         location.setLatitude(48.8650);
         location.setLongitude(2.3540);
         mViewModel.setLocation(location);
+        Log.e(TAG, "setLocation with: " + location.getLatitude() );
     }
 
     @Override

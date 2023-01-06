@@ -41,7 +41,7 @@ public class DetailsAdapter extends RecyclerView.Adapter<DetailsAdapter.DetailVi
 
         Glide.with(context)
                 .load(user.getUrlPicture())
-                .error(R.drawable.ic_baseline_person_24)
+                .error(R.drawable.ic_anon_user_48dp)
                 .circleCrop()
                 .into(holder.img_photo);
 

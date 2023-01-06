@@ -46,7 +46,8 @@
         </activity>
         <activity
             android:name=".ui.message.MessageActivity"
-            android:exported="false">
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.lunch.LunchActivity" />

@@ -11,7 +11,7 @@ public final class ChatRepository {
     private static final String MESSAGE_COLLECTION = "messages";
     private static volatile ChatRepository instance;
 
-    private ChatRepository() { }
+    public ChatRepository() { }
 
     public static ChatRepository getInstance() {
         ChatRepository result = instance;

@@ -1,7 +1,7 @@
 package com.draft.draftlunch.ui.workmates;
 
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.draft.draftlunch.Models.User;
@@ -24,7 +24,7 @@ public class WorkmatesViewModel extends ViewModel {
 
     // DATA
     @Nullable
-    private LiveData<List<User>> users;
+    private MutableLiveData<List<User>> liveUsers;
 
     // CONSTRUCTOR
 
@@ -32,21 +32,22 @@ public class WorkmatesViewModel extends ViewModel {
         this.userSource = userSource;
         this.restaurantSource = restaurantSource;
         this.executor = executor;
+        liveUsers = new MutableLiveData<List<User>>(){} ;
     }
 
     public void init() {
 
-        if (this.users != null) {
+        if (this.liveUsers != null || !this.liveUsers.getValue().isEmpty()) {
             return;
         }
-        users = userSource.getUsers();
+        liveUsers.setValue(userSource.getLiveUsers().getValue());
     }
 
     // -------------
     // FOR USER
     // -------------
 
-    public LiveData<List<User>> getUsers() { return this.users; }
+    public MutableLiveData<List<User>> getUsers() { return this.liveUsers; }
 
     // -------------
     // FOR RESTAURANT

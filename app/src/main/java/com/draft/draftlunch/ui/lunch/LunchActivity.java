@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
@@ -23,8 +24,18 @@ import com.bumptech.glide.request.RequestOptions;
 import com.draft.draftlunch.R;
 import com.draft.draftlunch.databinding.ActivityLunchBinding;
 import com.draft.draftlunch.ui.ViewModelFactory;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.Arrays;
 
 public class LunchActivity extends AppCompatActivity {
 
@@ -67,9 +78,10 @@ public class LunchActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         NavigationUI.setupWithNavController(binding.appBarLunch.bottomNavViewMenu, navController);
-/*
-        // AUTOCOMPLETE
 
+        //----------------
+        // AUTOCOMPLETE
+        //---------------
         String apiKey = getString(R.string.google_api_key);
         if(!Places.isInitialized()){
             Places.initialize(getApplicationContext(),apiKey);
@@ -101,15 +113,12 @@ public class LunchActivity extends AppCompatActivity {
                 // TODO: Handle the error.
                 Log.i(TAG, "An error occurred: " + status);
             }
-        });*/
-
+        });
     }
 
     private void configureViewModel() {
-
         this.mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(LunchViewModel.class);
         this.mViewModel.init();
-        mViewModel.getUsers().observe(this ,mViewModel::fetchRestaurants);
     }
 
     @Override

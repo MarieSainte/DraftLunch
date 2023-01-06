@@ -1,7 +1,10 @@
 package com.draft.draftlunch.ui.map;
 
 
+import static android.content.ContentValues.TAG;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.R;
+import com.draft.draftlunch.ui.ViewModelFactory;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,7 +46,10 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerClickLis
 
         @Override
         public void onMapReady(GoogleMap googleMap) {
+
             restaurants = mViewModel.getRestaurants();
+
+            // SET ALL MARKERS
             for(int i =0 ; i < restaurants.getValue().size() ; i++){
 
                 LatLng position = new LatLng(restaurants.getValue().get(i).getGeometry().getLocation().getLat(), restaurants.getValue().get(i).getGeometry().getLocation().getLng());
@@ -59,6 +66,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerClickLis
 
             }
 
+            // SET LISTENER FOR MyPOSITION BUTTON
             btnPosition.setOnClickListener(v -> moveCameraToMyPosition(googleMap));
             moveCameraToMyPosition(googleMap);
 
@@ -82,29 +90,27 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerClickLis
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
-        mViewModel = new ViewModelProvider(this).get(MapsViewModel.class);
-        mViewModel.init();
-        mViewModel.getRestaurants().observe(getViewLifecycleOwner(), this::updateView);
         btnPosition = view.findViewById(R.id.floating_action_button);
         progressBar = view.findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.VISIBLE);
+
+        mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(getContext())).get(MapsViewModel.class);
+        mViewModel.init();
+        mViewModel.getRestaurants().observe(getViewLifecycleOwner(), this::updateView);
+
+
     }
 
     private void updateView(List<Result> restaurants) {
+        progressBar.setVisibility(View.VISIBLE);
+        Log.e(TAG, "updateView: "+ restaurants.size());
         if (restaurants != null && !restaurants.isEmpty()){
             progressBar.setVisibility(View.GONE);
-            /*
+            Log.e(TAG, "updateView: "+ restaurants.size());
+
             if (mapFragment != null) {
                 mapFragment.getMapAsync(callback);
-            }*/
+            }
         }
-
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
     }
 
 

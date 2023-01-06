@@ -1,7 +1,7 @@
 package com.draft.draftlunch.ui.map;
 
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.draft.draftlunch.Models.Result;
@@ -24,7 +24,7 @@ public class MapsViewModel extends ViewModel {
 
     // DATA
     @Nullable
-    private LiveData<List<Result>> restaurants;
+    private MutableLiveData<List<Result>> restaurants ;
 
     // CONSTRUCTOR
 
@@ -32,6 +32,7 @@ public class MapsViewModel extends ViewModel {
         this.userSource = userSource;
         this.restaurantSource = restaurantSource;
         this.executor = executor;
+        restaurants = new MutableLiveData<List<Result>>() {} ;
     }
 
     public void init() {
@@ -39,7 +40,7 @@ public class MapsViewModel extends ViewModel {
         if (this.restaurants != null) {
             return;
         }
-        restaurants = restaurantSource.getMyRestaurants();
+        restaurants.setValue(restaurantSource.getMyRestaurants());
     }
 
     // -------------
@@ -50,8 +51,13 @@ public class MapsViewModel extends ViewModel {
     // -------------
     // FOR RESTAURANT
     // -------------
-
-    public LiveData<List<Result>> getRestaurants() { return this.restaurants; }
-
-
+    public MutableLiveData<List<Result>> getRestaurants() {
+        if (this.restaurants != null){
+            return this.restaurants;
+        }else if (userSource.getAllRestaurants() != null){
+            restaurants.setValue(restaurantSource.getMyRestaurants());
+            return restaurants;
+        }
+        return this.restaurants;
+    }
 }

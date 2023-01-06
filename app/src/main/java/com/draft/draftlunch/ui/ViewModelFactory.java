@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.draft.draftlunch.Services.ChatRepository;
 import com.draft.draftlunch.Services.RestaurantRepository;
 import com.draft.draftlunch.Services.UserRepository;
 import com.draft.draftlunch.ui.details.DetailsViewModel;
@@ -26,6 +27,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory{
 
     private final UserRepository userSource;
     private final RestaurantRepository restaurantSource;
+    private final ChatRepository chatSource;
     private final Executor executor;
     private static ViewModelFactory factory;
 
@@ -45,6 +47,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory{
 
     public ViewModelFactory(Context context) {
         this.userSource = new UserRepository().getInstance();
+        this.chatSource = new ChatRepository().getInstance();
         this.restaurantSource = new RestaurantRepository().getInstance();
         this.executor = Executors.newSingleThreadExecutor();
     }
@@ -82,7 +85,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory{
         }
 
         if (modelClass.isAssignableFrom(MessageViewModel.class)) {
-            return (T) new MessageViewModel(userSource, restaurantSource, executor);
+            return (T) new MessageViewModel(userSource, chatSource, executor);
         }
 
         throw new IllegalArgumentException("Unknown ViewModel class");

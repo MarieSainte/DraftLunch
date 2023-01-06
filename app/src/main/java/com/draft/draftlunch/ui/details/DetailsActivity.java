@@ -19,7 +19,6 @@ import com.bumptech.glide.Glide;
 import com.draft.draftlunch.Models.ResultDetail;
 import com.draft.draftlunch.Models.User;
 import com.draft.draftlunch.R;
-import com.draft.draftlunch.Services.RestaurantRepository;
 import com.draft.draftlunch.databinding.ActivityDetailsBinding;
 import com.draft.draftlunch.ui.ViewModelFactory;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -32,7 +31,6 @@ public class DetailsActivity extends AppCompatActivity {
     private DetailsViewModel mViewModel;
     private LiveData<List<User>> users;
     private RecyclerView recyclerView;
-    private RestaurantRepository restaurantRepository = RestaurantRepository.getInstance();
     private ResultDetail resultDetail;
     private String photoURL;
     private FirebaseAnalytics mFirebaseAnalytics;
@@ -47,8 +45,6 @@ public class DetailsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         configureViewModel();
-
-        restaurantRepository.FetchDetail(getIntent().getStringExtra("PlaceID"));
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);

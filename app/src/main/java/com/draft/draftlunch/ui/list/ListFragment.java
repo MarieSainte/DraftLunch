@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.R;
+import com.draft.draftlunch.ui.ViewModelFactory;
 
 import java.util.List;
 
@@ -38,29 +39,27 @@ public class ListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mViewModel.getRestaurants().observe(getViewLifecycleOwner(), this::updateView);
-
         recyclerView = view.findViewById(R.id.list_recyclerview);
         progressBar = view.findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.VISIBLE);
+
+        mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(getContext())).get(ListViewModel.class);
+        mViewModel.init();
+        mViewModel.getRestaurants().observe(getViewLifecycleOwner(), this::updateView);
+
     }
 
     private void updateView(List<Result> restaurants) {
-        if(restaurants!=null && !restaurants.isEmpty()){
+
+        if(!restaurants.isEmpty()){
             progressBar.setVisibility(View.GONE);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerView.setHasFixedSize(true);
             ListAdapter listAdapter = new ListAdapter(getContext(), (List<Result>) mViewModel.getRestaurants(), mViewModel.getLocation());
             recyclerView.setAdapter(listAdapter);
             listAdapter.notifyDataSetChanged();
+        }else{
+            progressBar.setVisibility(View.VISIBLE);
         }
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(ListViewModel.class);
-        mViewModel.init();
     }
 
 }

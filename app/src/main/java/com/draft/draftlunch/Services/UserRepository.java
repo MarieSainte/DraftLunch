@@ -1,10 +1,14 @@
 package com.draft.draftlunch.Services;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Context;
 import android.location.Location;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.Models.User;
@@ -29,9 +33,10 @@ public class UserRepository {
     private static final String RESTAURANT_LIKED_FIELD = "restaurantLiked";
     private static final String PICTURE_FIELD = "urlPicture";
     private static volatile UserRepository instance;
+    private static MutableLiveData<List<User>> liveUsers = new MutableLiveData<List<User>>(){};
     private static List<User> users = new ArrayList<>();
-    private static LiveData<List<Result>> allRestaurants;
-    private static Location location;
+    private static List<Result> allRestaurants = new ArrayList<>();
+    private static Location location = new Location("location");
 
     public UserRepository() { }
 
@@ -130,7 +135,7 @@ public class UserRepository {
                         user.setUrlPicture(documentSnapshot.getString(PICTURE_FIELD));
                         user.setReservation(documentSnapshot.getString(RESERVATION_FIELD));
                         users.add(user);
-
+                        liveUsers.setValue(users);
                 }
             }
         });
@@ -168,23 +173,25 @@ public class UserRepository {
         }
     }
 
-    public LiveData<List<Result>> CrossDataUsersAndRestaurant(LiveData<List<Result>> allRestaurants){
+    public void CrossDataUsersAndRestaurant(List<Result> allRestaurants){
         this.allRestaurants = allRestaurants;
-        for(int i = 0 ; i < users.size() ; i++){
-            for(int y = 0 ; y < allRestaurants.getValue().size() ; y++){
-                if (users.get(i).getReservation().equals(allRestaurants.getValue().get(y).getName())){
-                    allRestaurants.getValue().get(i).addHasBeenReservedBy(users.get(i));
+        Log.e(TAG, "CrossDataUsersAndRestaurant: " +allRestaurants.size() + "LiveUsers : " + liveUsers.getValue().size());
+        for(int i = 0 ; i < liveUsers.getValue().size() ; i++){
+            for(int y = 0 ; y < allRestaurants.size() ; y++){
+                Log.e(TAG, "LOOP : " + liveUsers.getValue().get(i).getUsername() + " -- " + allRestaurants.get(y).getName() );
+                if (liveUsers.getValue().get(i).getReservation().equals(allRestaurants.get(y).getName())){
+                    allRestaurants.get(i).addHasBeenReservedBy(liveUsers.getValue().get(i));
                 }
             }
         }
-        return allRestaurants;
+
     }
 
     public LiveData<List<User>> getJoiningUsers(String restaurant) {
         LiveData<List<User>> joiningUsers = null;
-        for(int i=0; i<users.size() ; i++){
-            if (users.get(i).getReservation().equals(restaurant)){
-                joiningUsers.getValue().add(users.get(i));
+        for(int i=0; i<liveUsers.getValue().size() ; i++){
+            if (liveUsers.getValue().get(i).getReservation().equals(restaurant)){
+                joiningUsers.getValue().add(liveUsers.getValue().get(i));
             }
 
         }
@@ -192,14 +199,14 @@ public class UserRepository {
     }
 
     public LiveData<List<User>> getUsers() {
-        return (LiveData<List<User>>) users;
+        return liveUsers;
     }
 
-    public LiveData<List<Result>> getAllRestaurants() {
+    public List<Result> getAllRestaurants() {
         return allRestaurants;
     }
 
-    public void setAllRestaurants(LiveData<List<Result>> allRestaurants) {
+    public void setAllRestaurants(List<Result> allRestaurants) {
         this.allRestaurants = allRestaurants;
     }
 
@@ -209,5 +216,13 @@ public class UserRepository {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public static MutableLiveData<List<User>> getLiveUsers() {
+        return liveUsers;
+    }
+
+    public static void setLiveUsers(MutableLiveData<List<User>> liveUsers) {
+        UserRepository.liveUsers = liveUsers;
     }
 }

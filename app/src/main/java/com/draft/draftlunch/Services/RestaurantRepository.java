@@ -2,14 +2,12 @@ package com.draft.draftlunch.Services;
 
 import android.util.Log;
 
-import androidx.lifecycle.LiveData;
-
 import com.draft.draftlunch.Models.DetailRestaurant;
 import com.draft.draftlunch.Models.Nearby;
 import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.Models.ResultDetail;
-import com.draft.draftlunch.Models.User;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +26,7 @@ public class RestaurantRepository {
     private static volatile RestaurantRepository instance;
     private static UserRepository userRepository = UserRepository.getInstance();
     private static Disposable disposable;
-    private static LiveData<List<Result>> myRestaurants;
+    private static List<Result> myRestaurants = new ArrayList<>();
     public static ResultDetail detailRestaurant;
 
 
@@ -60,13 +58,12 @@ public class RestaurantRepository {
 
     // FETCH RESTAURANTS NEARBY
 
-    public static void FetchRestaurants(String loc, List<User> users) {
+    public static void FetchRestaurants(String loc) {
         disposable = RestaurantRepository.streamFetchRestaurants(loc,4000,"restaurant","cruise","AIzaSyBQ4HmnvZGf8vwh-IvdUe8cCUsNENidYTo").subscribeWith(new DisposableObserver<Nearby>() {
 
             @Override
             public void onNext(Nearby restaurants) {
-                setMyRestaurants((LiveData<List<Result>>) restaurants.getResults());
-
+                setMyRestaurants(restaurants.getResults());
             }
 
             @Override
@@ -76,7 +73,7 @@ public class RestaurantRepository {
 
             @Override
             public void onComplete() {
-                myRestaurants = userRepository.CrossDataUsersAndRestaurant(myRestaurants);
+                //userRepository.CrossDataUsersAndRestaurant(getMyRestaurants());
             }
         });
     }
@@ -122,9 +119,9 @@ public class RestaurantRepository {
 
     // GETTER AND SETTER
 
-    public static LiveData<List<Result>> getMyRestaurants() {return myRestaurants;}
+    public static List<Result> getMyRestaurants() {return myRestaurants;}
 
-    public static void setMyRestaurants(LiveData<List<Result>> myRestaurants) {
+    public static void setMyRestaurants(List<Result> myRestaurants) {
         RestaurantRepository.myRestaurants = myRestaurants;
     }
 

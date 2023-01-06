@@ -141,7 +141,7 @@
         android:layout_width="0dp"
         android:layout_height="80dp"
         app:layout_constraintHorizontal_weight="1"
-       app:layout_constraintStart_toEndOf="@id/btn_call"
+        app:layout_constraintStart_toEndOf="@id/btn_call"
         app:layout_constraintEnd_toStartOf="@+id/btn_website"
         app:layout_constraintTop_toBottomOf="@+id/view_detail"
         android:backgroundTint="@color/white"/>
