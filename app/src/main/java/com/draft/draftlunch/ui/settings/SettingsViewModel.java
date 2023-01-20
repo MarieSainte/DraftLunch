@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.draft.draftlunch.Services.RestaurantRepository;
 import com.draft.draftlunch.Services.UserRepository;
+import com.google.android.gms.tasks.Task;
 
 import java.util.concurrent.Executor;
 
@@ -15,10 +16,6 @@ public class SettingsViewModel extends ViewModel {
 
     private final UserRepository userSource;
 
-    private final RestaurantRepository restaurantSource;
-
-    private final Executor executor;
-
     // DATA
 
 
@@ -26,12 +23,11 @@ public class SettingsViewModel extends ViewModel {
 
     public SettingsViewModel(UserRepository userSource, RestaurantRepository restaurantSource, Executor executor) {
         this.userSource = userSource;
-        this.restaurantSource = restaurantSource;
-        this.executor = executor;
     }
-
-
-    public void deleteUser(Context context) {
-        userSource.deleteUser(context);
+    public void deleteUser(){
+        userSource.deleteUser();
+    }
+    public Task<Void> deleteUser(Context context){
+        return userSource.deleteUser(context).addOnCompleteListener(task -> userSource.deleteUserFromFirestore());
     }
 }

@@ -1,15 +1,31 @@
 package com.draft.draftlunch.Services;
 
+import androidx.lifecycle.MutableLiveData;
+
+import com.draft.draftlunch.Models.ChatMessage;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 
 public final class ChatRepository {
 
     private static final String CHAT_COLLECTION = "chats";
-    private static final String MESSAGE_COLLECTION = "messages";
     private static volatile ChatRepository instance;
+    private static final UserRepository userRepository = UserRepository.getInstance();
+
+    private final MutableLiveData<List<ChatMessage>> chatMessages = new MutableLiveData<List<ChatMessage>>() {};
 
     public ChatRepository() { }
 
@@ -30,12 +46,48 @@ public final class ChatRepository {
         return FirebaseFirestore.getInstance().collection(CHAT_COLLECTION);
     }
 
-    public Query getAllMessageForChat(String chat){
-        return this.getChatCollection()
-                .document(chat)
-                .collection(MESSAGE_COLLECTION)
-                .orderBy("dateCreated")
-                .limit(50);
+    public void sentMessage(HashMap<String, Object> message) {
+        this.getChatCollection().add(message);
     }
 
+    public void listenMessage(String receivedId){
+        this.getChatCollection()
+                .whereEqualTo("SENDER_ID",userRepository.getCurrentUserUID())
+                .whereEqualTo("RECEIVED_ID",receivedId)
+                .addSnapshotListener(eventListener);
+        this.getChatCollection()
+                .whereEqualTo("SENDER_ID",receivedId)
+                .whereEqualTo("RECEIVED_ID",userRepository.getCurrentUserUID())
+                .addSnapshotListener(eventListener);
+    }
+
+    private final EventListener<QuerySnapshot> eventListener = (value, error) -> {
+        if (error != null){
+            return;
+        }
+        if (value != null){
+            List<ChatMessage> chatMessageList = new ArrayList<>();
+            for(DocumentChange documentChange : value.getDocumentChanges()){
+                if (documentChange.getType() == DocumentChange.Type.ADDED){
+                    ChatMessage chatMessage = new ChatMessage();
+                    chatMessage.senderId = documentChange.getDocument().getString("SENDER_ID");
+                    chatMessage.receivedId = documentChange.getDocument().getString("RECEIVED_ID");
+                    chatMessage.message = documentChange.getDocument().getString("INPUT_MESSAGE");
+                    chatMessage.dataTime = getReadableTime(documentChange.getDocument().getDate("TIMESTAMP"));
+                    chatMessage.dateObject = documentChange.getDocument().getDate("TIMESTAMP");
+                    chatMessageList.add(chatMessage);
+                    chatMessages.setValue(chatMessageList);
+                }
+                Collections.sort(Objects.requireNonNull(chatMessages.getValue()), (obj1, obj2) -> obj1.dateObject.compareTo(obj2.dateObject));
+            }
+        }
+    };
+
+    public String getReadableTime(Date date){
+        return new SimpleDateFormat("MMMM dd, yyyy - hh:mm a", Locale.getDefault()).format(date);
+    }
+
+    public MutableLiveData<List<ChatMessage>> getChatMessages() {
+        return chatMessages;
+    }
 }

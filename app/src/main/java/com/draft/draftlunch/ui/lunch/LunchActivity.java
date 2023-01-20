@@ -2,10 +2,12 @@ package com.draft.draftlunch.ui.lunch;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,90 +32,68 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 
-public class LunchActivity extends AppCompatActivity {
+public class LunchActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final int AUTOCOMPLETE_REQUEST_CODE = 123;
     private AppBarConfiguration mAppBarConfiguration;
-    private ActivityLunchBinding binding;
     private LunchViewModel mViewModel;
-    private ImageView img_profil;
+    protected ImageView img_profil;
     private TextView tv_name;
     private TextView tv_email;
 
+    /*
+     * TODO: DELETE                     - Problem: RULES IN FIRESTORE
+     * TODO: GET USER DATA              - Error: TASK IS NOT YET COMPLETED
+     * TODO: CHECK CROSS DATA           - CHECK
+     * TODO: AUTOCOMPLETE               - Problem: GOOGLE API Auth
+     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityLunchBinding.inflate(getLayoutInflater());
+        com.draft.draftlunch.databinding.ActivityLunchBinding binding = ActivityLunchBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        // Find our Navigation view
+        NavigationView navigationView = binding.navView;
         View headerView = navigationView.getHeaderView(0);
-        tv_name = (TextView) headerView.findViewById(R.id.tv_name);
-        tv_email = (TextView) headerView.findViewById(R.id.tv_email);
-        img_profil = (ImageView) headerView.findViewById(R.id.img_profil);
-        View search_bar = findViewById(R.id.search_bar);
+
+        tv_name = headerView.findViewById(R.id.tv_name);
+        tv_email = headerView.findViewById(R.id.tv_email);
+        img_profil = headerView.findViewById(R.id.img_profil);
+
+        if(!Places.isInitialized()){
+            Places.initialize(getApplicationContext(),getString(R.string.google_api_key));
+        }
+
+        // Set a Toolbar to replace the ActionBar.
         setSupportActionBar(binding.appBarLunch.toolbar);
-
-        configureViewModel();
-
+        // Find our drawer view
         DrawerLayout drawer = binding.drawerLayout;
-        updateUIWithUserData();
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_map,R.id.nav_list ,R.id.nav_workmates, R.id.nav_main, R.id.nav_settings)
+                R.id.nav_map,R.id.nav_list ,R.id.nav_workmates, R.id.nav_main, R.id.nav_settings, R.id.btnLogout)
                 .setOpenableLayout(drawer)
                 .build();
-
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_lunch);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         NavigationUI.setupWithNavController(binding.appBarLunch.bottomNavViewMenu, navController);
+        navigationView.setNavigationItemSelectedListener(this);
 
-        //----------------
-        // AUTOCOMPLETE
-        //---------------
-        String apiKey = getString(R.string.google_api_key);
-        if(!Places.isInitialized()){
-            Places.initialize(getApplicationContext(),apiKey);
-        }
-        PlacesClient placesClient = Places.createClient(this);
-
-        // Initialize the AutocompleteSupportFragment.
-        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
-                getSupportFragmentManager().findFragmentById(R.id.autoComplete);
-
-        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
-                new LatLng(48.8650,2.3540),
-                new LatLng(48.8650,2.3540)
-        ));
-
-        // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
-
-        // Set up a PlaceSelectionListener to handle the response.
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(@NonNull Place place) {
-                // TODO: Get info about the selected place.
-                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
-            }
-
-            @Override
-            public void onError(@NonNull Status status) {
-                // TODO: Handle the error.
-                Log.i(TAG, "An error occurred: " + status);
-            }
-        });
+        configureViewModel();
+        updateUIWithUserData();
     }
 
     private void configureViewModel() {
@@ -121,20 +101,40 @@ public class LunchActivity extends AppCompatActivity {
         this.mViewModel.init();
     }
 
+    //----------------
+    // SETUP NAVIGATION
+    //---------------
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.lunch, menu);
         return true;
     }
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.btn_search) {
+            startAutocompleteActivity();
+        }
+        return super.onOptionsItemSelected(item);
+    }
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_lunch);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId()==R.id.btnLogout){
+            mViewModel.signOut(this);
+            finish();
+        }
 
+        return false;
+    }
+
+    //----------------
+    // UPDATE VIEWS
+    //---------------
     private void updateUIWithUserData(){
 
         if(mViewModel.getCurrentUser() != null){
@@ -158,5 +158,37 @@ public class LunchActivity extends AppCompatActivity {
                 .load(profilePictureUrl)
                 .apply(RequestOptions.circleCropTransform())
                 .into(img_profil);
+    }
+
+    //----------------
+    // AUTOCOMPLETE
+    //---------------
+    public void startAutocompleteActivity(){
+        PlacesClient placesClient = Places.createClient(this);
+        Intent intent = new Autocomplete.IntentBuilder(
+                AutocompleteActivityMode.OVERLAY,
+                Arrays.asList(Place.Field.ID, Place.Field.NAME))
+                .setLocationBias(RectangularBounds.newInstance(
+                      new LatLng(48.8630,2.3320),
+                      new LatLng(48.8650,2.3540)))
+                .setCountry("FR")
+                .build(this);
+        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == AUTOCOMPLETE_REQUEST_CODE){
+            if(resultCode == RESULT_OK){
+                Place place = Autocomplete.getPlaceFromIntent(data);
+
+            }else if (resultCode == AutocompleteActivity.RESULT_ERROR){
+                Status status = Autocomplete.getStatusFromIntent(data);
+            }else if (resultCode == RESULT_CANCELED){
+                Log.e(TAG, "onActivityResult: CANCELED " );
+            }
+        }
     }
 }

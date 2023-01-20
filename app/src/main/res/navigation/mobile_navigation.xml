@@ -8,18 +8,18 @@
     <fragment
         android:id="@+id/nav_map"
         android:name="com.draft.draftlunch.ui.map.MapsFragment"
-        android:label="fragment_maps"
+        android:label="@string/Hungry"
         tools:layout="@layout/fragment_maps" />
 
     <fragment
         android:id="@+id/nav_list"
         android:name="com.draft.draftlunch.ui.list.ListFragment"
-        android:label="fragment_list"
+        android:label="@string/Hungry"
         tools:layout="@layout/fragment_list" />
     <fragment
         android:id="@+id/nav_workmates"
         android:name="com.draft.draftlunch.ui.workmates.WorkmatesFragment"
-        android:label="fragment_workmates"
+        android:label="@string/AvailableWorkmates"
         tools:layout="@layout/fragment_workmates" />
     <activity
         android:id="@+id/nav_main"

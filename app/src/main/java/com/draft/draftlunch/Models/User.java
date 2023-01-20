@@ -2,30 +2,38 @@ package com.draft.draftlunch.Models;
 
 import androidx.annotation.Nullable;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 import java.util.List;
 
-public class User  {
-
+public class User implements Serializable {
+    @SerializedName("uid")
+    @Expose
     private String uid;
+    @SerializedName("username")
+    @Expose
     private String username;
+    @SerializedName("email")
+    @Expose
     private String email;
+    @SerializedName("reservation")
+    @Expose
     private String reservation;
+    @SerializedName("restaurantLiked")
+    @Expose
     private List<String> restaurantLiked;
+    @SerializedName("urlPicture")
+    @Expose
     @Nullable
     private String urlPicture;
-    private List<User> allUsers;
-    private List<Result> allRestaurants;
+
 
     public User() {
     }
 
-    public User(String username, @Nullable String urlPicture ,@Nullable String reservation) {
-        this.username = username;
-        this.urlPicture = urlPicture;
-        this.reservation = reservation;
-    }
-
-    public User(String uid, String username, String email, @Nullable String urlPicture,String reservation,List<String> restaurantLiked) {
+    public User(String uid, String username, String email, @Nullable String urlPicture, String reservation, List<String> restaurantLiked) {
         this.uid = uid;
         this.username = username;
         this.email = email;
@@ -82,6 +90,4 @@ public class User  {
     public void setRestaurantLiked(List<String> restaurantLiked) {
         this.restaurantLiked = restaurantLiked;
     }
-
-
 }

@@ -1,27 +1,23 @@
 package com.draft.draftlunch.ui.details;
 
-import static android.content.ContentValues.TAG;
-
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.draft.draftlunch.Models.ResultDetail;
+import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.Models.User;
 import com.draft.draftlunch.R;
 import com.draft.draftlunch.databinding.ActivityDetailsBinding;
 import com.draft.draftlunch.ui.ViewModelFactory;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.List;
 
@@ -29,48 +25,66 @@ public class DetailsActivity extends AppCompatActivity {
 
     private ActivityDetailsBinding binding;
     private DetailsViewModel mViewModel;
-    private LiveData<List<User>> users;
-    private RecyclerView recyclerView;
-    private ResultDetail resultDetail;
     private String photoURL;
-    private FirebaseAnalytics mFirebaseAnalytics;
+    protected boolean liked = false;
+    protected boolean hasReserved = false;
+    protected List<User> users;
+    Result restaurant = new Result();
 
-
+    //TODO: CHECK DETAILS
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_details);
-
         binding = ActivityDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        restaurant = (Result)getIntent().getSerializableExtra("Restaurant");
+
         configureViewModel();
 
-        // Obtain the FirebaseAnalytics instance.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        setupListener();
+        setupRecyclerView();
+        mViewModel.getUser().observe(this, this::updateView);
+    }
 
-        binding.tvName.setText(getIntent().getStringExtra("Name"));
-        binding.tvAddress.setText(getIntent().getStringExtra("Address"));
+    private void updateView(User user) {
 
+        binding.tvName.setText(restaurant.getName());
+        binding.tvAddress.setText(restaurant.getVicinity());
 
-        String photoRef = getIntent().getStringExtra("photo_URL");
-        try {
+//        if (user.getRestaurantLiked() != null){
+//            for( int i = 0; i < user.getRestaurantLiked().size(); i++){
+//
+//                if (user.getRestaurantLiked().get(i).equals(restaurant.getName())){
+//
+//                    liked = true;
+//                    binding.starToLike.setImageTintList(AppCompatResources.getColorStateList(this, R.color.yellow));
+//                }
+//            }
+//        }
+//        if (user.getReservation().equals(restaurant.getName())){
+//            hasReserved = true;
+//            binding.btnReserved.setImageTintList(AppCompatResources.getColorStateList(this, R.color.green));
+//        }
+
+        // SETUP THE RESTAURANT IMAGE
+        String photoRef = restaurant.getPhotos().get(0).getPhotoReference();
+        if (photoRef != null){
             photoURL = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=" +
                     photoRef +
                     "&key=AIzaSyBQ4HmnvZGf8vwh-IvdUe8cCUsNENidYTo";
-        }catch(Exception e){
-
         }
 
-        if(!getIntent().getStringExtra("photo_URL").isEmpty()){
-            Glide.with(this)
-                    .load(photoURL)
-                    .error(R.drawable.img_drawers)
-                    .centerCrop()
-                    .into(binding.imgPhotoDetail);
-        }
-        double rate = getIntent().getDoubleExtra("Rate",0.0);
-       // SETTING STARS FOR RATING
+        Glide.with(this)
+                .load(photoURL)
+                .error(R.drawable.img_drawers)
+                .centerCrop()
+                .into(binding.imgPhotoDetail);
+
+
+
+        // SETUP STARS FOR RATING
+        double rate = restaurant.getRating();
         if (rate > 0.5){
 
             binding.imgRateFirst.setVisibility(View.VISIBLE);
@@ -86,15 +100,15 @@ public class DetailsActivity extends AppCompatActivity {
             binding.imgRateSecond.setVisibility(View.INVISIBLE);
             binding.imgRateThird.setVisibility(View.INVISIBLE);
         }
+    }
 
-        users = mViewModel.getJoiningUsers(getIntent().getStringExtra("Name"));
-        setupListener();
-
-        if(users!=null || users.getValue().size()!=0){
-            recyclerView = findViewById(R.id.recyclerview_detail);
+    @SuppressLint("NotifyDataSetChanged")
+    private void setupRecyclerView() {
+        if(users !=null) {
+            RecyclerView recyclerView = findViewById(R.id.recyclerview_detail);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setHasFixedSize(true);
-            DetailsAdapter detailsAdapter = new DetailsAdapter(this, users.getValue());
+            DetailsAdapter detailsAdapter = new DetailsAdapter(this, users);
             recyclerView.setAdapter(detailsAdapter);
             detailsAdapter.notifyDataSetChanged();
         }
@@ -103,53 +117,50 @@ public class DetailsActivity extends AppCompatActivity {
     private void configureViewModel() {
 
         this.mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(DetailsViewModel.class);
-
-        this.mViewModel.init(getIntent().getStringExtra("PlaceID"),getIntent().getStringExtra("Name"));
-
+        this.mViewModel.init(restaurant.getPlaceId(),restaurant.getName());
+        users = mViewModel.getJoiningUsers();
     }
 
     private void setupListener() {
 
-        String number = mViewModel.getDetailRestaurant().getFormattedPhoneNumber();
-        String website = mViewModel.getDetailRestaurant().getWebsite();
-
+        // CALL BUTTON LISTENER
         binding.btnCall.setOnClickListener(v -> {
-
-            if(number !=null || !number.isEmpty()){
-                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + number));
+            if(mViewModel.getDetailRestaurant().getFormattedPhoneNumber() !=null){
+                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + mViewModel.getDetailRestaurant().getFormattedPhoneNumber()));
                 startActivity(intent);
-            }else{
-                Log.e(TAG, "Pas de Numero");
             }
-
         });
 
+        // LIKE BUTTON LISTENER
         binding.btnLike.setOnClickListener(v -> {
-
-            binding.starToLike.setImageTintList(AppCompatResources.getColorStateList(this, R.color.yellow));
-            mViewModel.addRestaurantLiked(getIntent().getStringExtra("Name"));
+            if(liked){
+                liked = false;
+                binding.starToLike.setImageTintList(AppCompatResources.getColorStateList(this, R.color.gray));
+            }else{
+                liked = true;
+                binding.starToLike.setImageTintList(AppCompatResources.getColorStateList(this, R.color.yellow));
+                mViewModel.addRestaurantLiked(restaurant.getName());
+            }
         });
 
+        // WEBSITE BUTTON LISTENER
         binding.btnWebsite.setOnClickListener(v -> {
-            if(website !=null || !website.isEmpty()){
+            if(mViewModel.getDetailRestaurant().getWebsite() !=null){
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mViewModel.getDetailRestaurant().getWebsite()));
                 startActivity(browserIntent);
             }
-
         });
 
+        // RESERVATION BUTTON LISTENER
         binding.btnReserved.setOnClickListener(v -> {
-            binding.btnReserved.setImageTintList(AppCompatResources.getColorStateList(this, R.color.green));
-            mViewModel.addReservation(getIntent().getStringExtra("Name"));
-            mFirebaseAnalytics.setUserProperty("hasReserved", getIntent().getStringExtra("Name"));
+            if(hasReserved){
+                hasReserved = false;
+                binding.btnReserved.setImageTintList(AppCompatResources.getColorStateList(this, R.color.gray));
+            }else{
+                hasReserved = true;
+                binding.btnReserved.setImageTintList(AppCompatResources.getColorStateList(this, R.color.green));
+                mViewModel.addReservation(getIntent().getStringExtra("Name"));
+            }
         });
-    }
-
-    public ResultDetail getResultDetail() {
-        return resultDetail;
-    }
-
-    public void setResultDetail(ResultDetail resultDetail) {
-        this.resultDetail = resultDetail;
     }
 }

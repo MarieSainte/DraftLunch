@@ -10,7 +10,9 @@
     <string name="error_authentication_canceled">authentication canceled</string>
     <string name="error_no_internet">no internet</string>
     <string name="error_unknown_error">unknown error</string>
-
+    <string name="facebook_application_id" translatable="false">1900366026971640</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb1900366026971640</string>
+    <string name="facebook_client_token" translatable="false">e392832025eeb33b78c384701f8a34cd</string>
     <string name="info_no_email_found">info no email found</string>
     <string name="info_no_username_found">info no username found</string>
     <string name="delete_the_account">delete the account</string>
@@ -25,7 +27,15 @@
     <string name="request_perms">This application requires a permission to access your location</string>
     <string name="Open_now">Open now</string>
     <string name="Close">Close</string>
-    <string name="default_notification_channel_id">101</string>
+    <string name="default_notification_channel_id" translatable="false">101</string>
+    <string name="joining"> is joining!</string>
+    <string name="Compose_your_message" translatable="false">Message</string>
+    <string name="popup_message_choice_yes">Yes</string>
+    <string name="popup_message_confirmation_delete_account">Are sure you want delete your account ?</string>
+    <string name="popup_message_choice_no">No</string>
+    <string name="Hungry">I\'m Hungry!</string>
+    <string name="AvailableWorkmates">Available workmates</string>
+    <string name="find_a_place" translatable="false">Find a PLace</string>
     <string-array name="languages">
         <item>English</item>
         <item>Français</item>

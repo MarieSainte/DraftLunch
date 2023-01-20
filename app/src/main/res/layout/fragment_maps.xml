@@ -31,7 +31,7 @@
             android:layout_marginBottom="65dp"
             app:srcCompat="@drawable/ic_baseline_my_location_24"
             android:backgroundTint="@color/white"
-            app:tint="@color/colorPrimary"/>
+            app:tint="@color/black"/>
 
     </fragment>
 </LinearLayout>

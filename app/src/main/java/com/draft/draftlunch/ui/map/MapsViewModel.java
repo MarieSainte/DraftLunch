@@ -1,6 +1,7 @@
 package com.draft.draftlunch.ui.map;
 
-import androidx.annotation.Nullable;
+import android.location.Location;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -18,29 +19,11 @@ public class MapsViewModel extends ViewModel {
 
     private final UserRepository userSource;
 
-    private final RestaurantRepository restaurantSource;
-
-    private final Executor executor;
-
-    // DATA
-    @Nullable
-    private MutableLiveData<List<Result>> restaurants ;
-
     // CONSTRUCTOR
 
     public MapsViewModel(UserRepository userSource, RestaurantRepository restaurantSource, Executor executor) {
         this.userSource = userSource;
-        this.restaurantSource = restaurantSource;
-        this.executor = executor;
-        restaurants = new MutableLiveData<List<Result>>() {} ;
-    }
 
-    public void init() {
-
-        if (this.restaurants != null) {
-            return;
-        }
-        restaurants.setValue(restaurantSource.getMyRestaurants());
     }
 
     // -------------
@@ -52,12 +35,15 @@ public class MapsViewModel extends ViewModel {
     // FOR RESTAURANT
     // -------------
     public MutableLiveData<List<Result>> getRestaurants() {
-        if (this.restaurants != null){
-            return this.restaurants;
-        }else if (userSource.getAllRestaurants() != null){
-            restaurants.setValue(restaurantSource.getMyRestaurants());
-            return restaurants;
-        }
-        return this.restaurants;
+        return RestaurantRepository.getMyRestaurants();
+    }
+
+
+    public List<Result> CrossDataUsersAndRestaurant(MutableLiveData<List<Result>> restaurants) {
+        return  userSource.CrossDataUsersAndRestaurant(restaurants);
+    }
+
+    public Location getLocation() {
+        return userSource.getLocation();
     }
 }

@@ -1,15 +1,15 @@
 
 package com.draft.draftlunch.Models;
 
-import javax.annotation.Generated;
-
-import com.draft.Location;
-import com.draft.Viewport;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
+import javax.annotation.Generated;
+
 @Generated("jsonschema2pojo")
-public class Geometry {
+public class Geometry implements Serializable {
 
     @SerializedName("location")
     @Expose

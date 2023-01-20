@@ -1,13 +1,12 @@
 package com.draft.draftlunch.ui.details;
 
-import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.draft.draftlunch.Models.ResultDetail;
 import com.draft.draftlunch.Models.User;
 import com.draft.draftlunch.Services.RestaurantRepository;
 import com.draft.draftlunch.Services.UserRepository;
-import com.google.android.gms.tasks.Task;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -18,25 +17,21 @@ public class DetailsViewModel extends ViewModel {
 
     private final UserRepository userSource;
 
-    private final RestaurantRepository restaurantSource;
-
-    private final Executor executor;
 
     // DATA
-
-    LiveData<List<User>> JoiningUsers;
-
+    final MutableLiveData<User> user = new MutableLiveData<>();
+    List<User> JoiningUsers;
+    String reservation;
+    List likedRestaurant;
     // CONSTRUCTOR
 
     public DetailsViewModel(UserRepository userSource, RestaurantRepository restaurantSource, Executor executor) {
         this.userSource = userSource;
-        this.restaurantSource = restaurantSource;
-        this.executor = executor;
     }
 
     public void init(String place_id, String restaurant_name) {
 
-        restaurantSource.FetchDetail(place_id);
+        RestaurantRepository.FetchDetail(place_id);
         JoiningUsers = userSource.getJoiningUsers(restaurant_name);
     }
 
@@ -45,21 +40,28 @@ public class DetailsViewModel extends ViewModel {
     // -------------
 
     // FETCH ALL USERS WHO HAVE RESERVED THE RESTAURANT
-    public LiveData<List<User>> getJoiningUsers(String name){return this.JoiningUsers;}
+    public List<User> getJoiningUsers(){return this.JoiningUsers;}
 
-    public Task<Void> addRestaurantLiked(String restaurantLiked){
-        return userSource.addRestaurantLiked(restaurantLiked);
+    public MutableLiveData<User> getUser(){
+        //user.setValue(userSource.getUserData().continueWith(task -> task.getResult().toObject(User.class)).getResult());
+        user.setValue(userSource.getUserData().getResult().toObject(User.class));
+        return this.user;
     }
 
-    public Task<Void> addReservation(String reservation){
-        return userSource.addReservation(reservation);
+    // ADD THIS RESTAURANT TO THE FAVORITE LIST IN FIRESTORE
+    public void addRestaurantLiked(String restaurantLiked){
+        userSource.addRestaurantLiked(restaurantLiked);
+    }
+
+    // SET THIS RESTAURANT AS RESERVED IN FIRESTORE
+    public void addReservation(String reservation){
+        userSource.addReservation(reservation);
     }
 
     // -------------
     // FOR RESTAURANT
     // -------------
 
-    public ResultDetail getDetailRestaurant(){return restaurantSource.getDetailRestaurant();}
-
+    public ResultDetail getDetailRestaurant(){return RestaurantRepository.getDetailRestaurant();}
 
 }

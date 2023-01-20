@@ -21,23 +21,25 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class UserRepository {
 
-    private static final String COLLECTION_NAME = "users";
+    private static final String COLLECTION_USERS = "users";
     private static final String USERNAME_FIELD = "username";
     private static final String RESERVATION_FIELD = "reservation";
     private static final String RESTAURANT_LIKED_FIELD = "restaurantLiked";
     private static final String PICTURE_FIELD = "urlPicture";
+    private static final String ID_FIELD = "uid";
     private static volatile UserRepository instance;
-    private static MutableLiveData<List<User>> liveUsers = new MutableLiveData<List<User>>(){};
-    private static List<User> users = new ArrayList<>();
-    private static List<Result> allRestaurants = new ArrayList<>();
+    private static final MutableLiveData<List<User>> liveUsers = new MutableLiveData<List<User>>(){};
+    private static final List<User> users = new ArrayList<>();
     private static Location location = new Location("location");
-
+    private static String userId;
     public UserRepository() { }
 
     public static UserRepository getInstance() {
@@ -69,7 +71,7 @@ public class UserRepository {
 
     // Get the Collection Reference
     private CollectionReference getUsersCollection(){
-        return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
+        return FirebaseFirestore.getInstance().collection(COLLECTION_USERS);
     }
 
     // Create User in Firestore
@@ -80,14 +82,18 @@ public class UserRepository {
             String username = user.getDisplayName();
             String email = user.getEmail();
             String uid = user.getUid();
-            String reservation = null;
-            List<String> restaurantLiked = null;
+            String reservation = "";
 
-            User userToCreate = new User(uid, username, email, urlPicture, null,null);
+
+            User userToCreate = new User(uid, username, email, urlPicture, reservation,null);
 
             Task<DocumentSnapshot> userData = getUserData();
-            // If the user already exist in Firestore, we get his data (isMentor)
-            userData.addOnSuccessListener(documentSnapshot -> this.getUsersCollection().document(uid).set(userToCreate));
+
+
+            // If the user already exist in Firestore, we get his data
+            userData.addOnSuccessListener(documentSnapshot ->
+                    this.getUsersCollection().document(uid).set(userToCreate)
+            );
         }
     }
 
@@ -100,17 +106,46 @@ public class UserRepository {
             return null;
         }
     }
-
+    // Get User Reservation from Firestore
+    public Task<DocumentSnapshot> getReservation(){
+        String uid = this.getCurrentUserUID();
+        if(uid != null){
+            return this.getUsersCollection().document(uid).get(Source.valueOf(RESERVATION_FIELD));
+        }else{
+            return null;
+        }
+    }
+    // Get User's favorite Restaurant from Firestore
+    public Task<DocumentSnapshot> getlikedRestaurant(){
+        String uid = this.getCurrentUserUID();
+        if(uid != null){
+            return this.getUsersCollection().document(uid).get(Source.valueOf(RESTAURANT_LIKED_FIELD));
+        }else{
+            return null;
+        }
+    }
     // Delete the User from Firebase
     public Task<Void> deleteUser(Context context){
+        userId = this.getCurrentUserUID();
         return AuthUI.getInstance().delete(context);
+    }
+
+    public void deleteUser(){
+        String uid = this.getCurrentUserUID();
+        Log.e(TAG, "delete: "+uid );
+        Objects.requireNonNull(getCurrentUser()).delete().addOnCompleteListener(task -> {
+            Log.e(TAG, "delete from firebase" );
+            if (task.isSuccessful()) {
+                Log.e(TAG, "delete from firestore in progress: " );
+                this.getUsersCollection().document(uid).delete();
+            }
+        });
     }
 
     // Delete the User from Firestore
     public void deleteUserFromFirestore() {
-        String uid = this.getCurrentUserUID();
-        if(uid != null){
-            this.getUsersCollection().document(uid).delete();
+        if(userId != null){
+            this.getUsersCollection().document(userId).delete();
         }
     }
 
@@ -134,64 +169,56 @@ public class UserRepository {
                         user.setUsername(documentSnapshot.getString(USERNAME_FIELD));
                         user.setUrlPicture(documentSnapshot.getString(PICTURE_FIELD));
                         user.setReservation(documentSnapshot.getString(RESERVATION_FIELD));
+                        user.setUid(documentSnapshot.getString(ID_FIELD));
                         users.add(user);
-                        liveUsers.setValue(users);
+                        setLiveUsers(users);
                 }
             }
-        });
-    }
-
-    // Update User Username
-    public Task<Void> updateUsername(String username) {
-        String uid = this.getCurrentUserUID();
-        if(uid != null){
-            return this.getUsersCollection().document(uid).update(USERNAME_FIELD, username);
-        }else{
-            return null;
-        }
+        }).addOnSuccessListener(aVoid -> RestaurantRepository.FetchRestaurants(getLocation().getLatitude() + "," + getLocation().getLongitude()));
     }
 
     // Set a reservation in Firestore
-    public Task<Void> addReservation(String reservation) {
+    public void addReservation(String reservation) {
         String uid = this.getCurrentUserUID();
-        if(uid != null){
-            return this.getUsersCollection().document(uid).update(RESERVATION_FIELD, reservation);
-        }else{
-            return null;
+        if(uid != null) {
+
+            this.getUsersCollection().document(uid).update(RESERVATION_FIELD, reservation);
         }
     }
 
     // Add a liked restaurant in Firestore
-    public Task<Void> addRestaurantLiked(String restaurantLiked) {
+    public void addRestaurantLiked(String restaurantLiked) {
         String uid = this.getCurrentUserUID();
         if(uid != null){
-            FirebaseUser user = getCurrentUser();
 
-            return this.getUsersCollection().document(uid).update(RESTAURANT_LIKED_FIELD, FieldValue.arrayUnion(restaurantLiked));
-        }else{
-            return null;
+            this.getUsersCollection().document(uid).update(RESTAURANT_LIKED_FIELD, FieldValue.arrayUnion(restaurantLiked));
         }
     }
 
-    public void CrossDataUsersAndRestaurant(List<Result> allRestaurants){
-        this.allRestaurants = allRestaurants;
-        Log.e(TAG, "CrossDataUsersAndRestaurant: " +allRestaurants.size() + "LiveUsers : " + liveUsers.getValue().size());
-        for(int i = 0 ; i < liveUsers.getValue().size() ; i++){
-            for(int y = 0 ; y < allRestaurants.size() ; y++){
-                Log.e(TAG, "LOOP : " + liveUsers.getValue().get(i).getUsername() + " -- " + allRestaurants.get(y).getName() );
-                if (liveUsers.getValue().get(i).getReservation().equals(allRestaurants.get(y).getName())){
-                    allRestaurants.get(i).addHasBeenReservedBy(liveUsers.getValue().get(i));
+    public List<Result> CrossDataUsersAndRestaurant(MutableLiveData<List<Result>> allRestaurants){
+        if (liveUsers.getValue() != null){
+            for(int i = 0 ; i < liveUsers.getValue().size() ; i++){
+                if(allRestaurants != null){
+                    for(int y = 0; y < Objects.requireNonNull(allRestaurants.getValue()).size() ; y++){
+                        if (liveUsers.getValue().get(i).getReservation().equals(allRestaurants.getValue().get(y).getName())){
+                            Log.e(TAG, "LOOP : " + liveUsers.getValue().get(i).getUsername() + " -- " + allRestaurants.getValue().get(y).getName() );
+                            allRestaurants.getValue().get(i).addHasBeenReservedBy(liveUsers.getValue().get(i));
+                        }
+                    }
                 }
             }
         }
-
+        return Objects.requireNonNull(allRestaurants).getValue();
     }
 
-    public LiveData<List<User>> getJoiningUsers(String restaurant) {
-        LiveData<List<User>> joiningUsers = null;
-        for(int i=0; i<liveUsers.getValue().size() ; i++){
+    public List<User> getJoiningUsers(String restaurant) {
+        List<User> joiningUsers = new ArrayList<>();
+        for(int i = 0; i< Objects.requireNonNull(liveUsers.getValue()).size() ; i++){
+            if(liveUsers.getValue().get(i).getReservation()==null){
+                continue;
+            }
             if (liveUsers.getValue().get(i).getReservation().equals(restaurant)){
-                joiningUsers.getValue().add(liveUsers.getValue().get(i));
+                joiningUsers.add(liveUsers.getValue().get(i));
             }
 
         }
@@ -202,27 +229,19 @@ public class UserRepository {
         return liveUsers;
     }
 
-    public List<Result> getAllRestaurants() {
-        return allRestaurants;
-    }
-
-    public void setAllRestaurants(List<Result> allRestaurants) {
-        this.allRestaurants = allRestaurants;
-    }
-
     public Location getLocation() {
         return location;
     }
 
     public void setLocation(Location location) {
-        this.location = location;
+        UserRepository.location = location;
     }
 
     public static MutableLiveData<List<User>> getLiveUsers() {
         return liveUsers;
     }
 
-    public static void setLiveUsers(MutableLiveData<List<User>> liveUsers) {
-        UserRepository.liveUsers = liveUsers;
+    public static void setLiveUsers(List<User> users) {
+        liveUsers.setValue(users);
     }
 }

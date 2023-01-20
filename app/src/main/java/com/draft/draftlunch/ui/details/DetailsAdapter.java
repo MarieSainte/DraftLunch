@@ -1,5 +1,6 @@
 package com.draft.draftlunch.ui.details;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +20,8 @@ import java.util.List;
 
 public class DetailsAdapter extends RecyclerView.Adapter<DetailsAdapter.DetailViewHolder>{
 
-    Context context;
-    List<User> users;
+    final Context context;
+    final List<User> users;
 
     public DetailsAdapter(Context context, List<User> users) {
         this.context = context;
@@ -31,9 +32,10 @@ public class DetailsAdapter extends RecyclerView.Adapter<DetailsAdapter.DetailVi
     @Override
     public DetailsAdapter.DetailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(context).inflate(R.layout.item_people,parent,false);
-        return new DetailsAdapter.DetailViewHolder(v);
+        return new DetailViewHolder(v);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull DetailsAdapter.DetailViewHolder holder, int position) {
 
@@ -45,7 +47,7 @@ public class DetailsAdapter extends RecyclerView.Adapter<DetailsAdapter.DetailVi
                 .circleCrop()
                 .into(holder.img_photo);
 
-        holder.tv_status.setText(user.getUsername()+" is joining!");
+        holder.tv_status.setText(user.getUsername()+" "+context.getString(R.string.joining));
     }
 
     @Override
@@ -53,11 +55,11 @@ public class DetailsAdapter extends RecyclerView.Adapter<DetailsAdapter.DetailVi
         return users.size();
     }
 
-    public class DetailViewHolder extends RecyclerView.ViewHolder {
+    public static class DetailViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView img_photo;
-        TextView tv_status;
-        ConstraintLayout item;
+        final ImageView img_photo;
+        final TextView tv_status;
+        final ConstraintLayout item;
 
         public DetailViewHolder(@NonNull View itemView) {
             super(itemView);

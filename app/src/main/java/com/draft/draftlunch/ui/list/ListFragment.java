@@ -24,7 +24,6 @@ public class ListFragment extends Fragment {
     private ListViewModel mViewModel;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-
     public static ListFragment newInstance() {
         return new ListFragment();
     }
@@ -43,23 +42,22 @@ public class ListFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressBar);
 
         mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(getContext())).get(ListViewModel.class);
-        mViewModel.init();
+
         mViewModel.getRestaurants().observe(getViewLifecycleOwner(), this::updateView);
+
 
     }
 
     private void updateView(List<Result> restaurants) {
 
-        if(!restaurants.isEmpty()){
+        if(restaurants != null){
             progressBar.setVisibility(View.GONE);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerView.setHasFixedSize(true);
-            ListAdapter listAdapter = new ListAdapter(getContext(), (List<Result>) mViewModel.getRestaurants(), mViewModel.getLocation());
+            ListAdapter listAdapter = new ListAdapter(getContext(), mViewModel.getRestaurants(), mViewModel.getLocation());
             recyclerView.setAdapter(listAdapter);
-            listAdapter.notifyDataSetChanged();
         }else{
             progressBar.setVisibility(View.VISIBLE);
         }
     }
-
 }

@@ -1,12 +1,15 @@
 
-package com.draft;
+package com.draft.draftlunch.Models;
 
-import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
+import javax.annotation.Generated;
+
 @Generated("jsonschema2pojo")
-public class PlusCode {
+public class PlusCode implements Serializable {
 
     @SerializedName("compound_code")
     @Expose

@@ -3,71 +3,73 @@ package com.draft.draftlunch.ui.map;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.R;
+import com.draft.draftlunch.databinding.FragmentMapsBinding;
 import com.draft.draftlunch.ui.ViewModelFactory;
+import com.draft.draftlunch.ui.details.DetailsActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 public class MapsFragment extends Fragment implements GoogleMap.OnMarkerClickListener {
 
-
+    private FragmentMapsBinding binding;
     private MapsViewModel mViewModel;
-    private Marker marker;
-    private FloatingActionButton btnPosition;
-    private ProgressBar progressBar;
     private SupportMapFragment mapFragment;
+    protected MutableLiveData<List<Result>> restaurants ;
 
-
-    private OnMapReadyCallback callback = new OnMapReadyCallback() {
-        private LiveData<List<Result>> restaurants ;
+    private final OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         @Override
-        public void onMapReady(GoogleMap googleMap) {
-
+        public void onMapReady(@NonNull GoogleMap googleMap) {
             restaurants = mViewModel.getRestaurants();
 
             // SET ALL MARKERS
-            for(int i =0 ; i < restaurants.getValue().size() ; i++){
+            for(int i = 0; i < Objects.requireNonNull(restaurants.getValue()).size() ; i++){
 
                 LatLng position = new LatLng(restaurants.getValue().get(i).getGeometry().getLocation().getLat(), restaurants.getValue().get(i).getGeometry().getLocation().getLng());
+                Marker marker;
                 if (restaurants.getValue().get(i).getHasBeenReservedBy().size() > 0){
                     marker = googleMap.addMarker(new MarkerOptions().position(position)
                             .title(restaurants.getValue().get(i).getName())
-                            .icon(BitmapDescriptorFactory.defaultMarker(1)));
+                            .icon(getMarkerIcon("#22ad1f")));
+                    Objects.requireNonNull(marker).setTag(i);
                 }else{
                     marker = googleMap.addMarker(new MarkerOptions().position(position)
-                            .title(restaurants.getValue().get(i).getName())
-                            .icon(BitmapDescriptorFactory.defaultMarker(1)));
+                            .title(restaurants.getValue().get(i).getName()));
+                    Objects.requireNonNull(marker).setTag(i);
                 }
-                marker.setTag(restaurants.getValue().get(i).getPlaceId());
+
 
             }
 
             // SET LISTENER FOR MyPOSITION BUTTON
-            btnPosition.setOnClickListener(v -> moveCameraToMyPosition(googleMap));
+            binding.floatingActionButton.setOnClickListener(v -> moveCameraToMyPosition(googleMap));
             moveCameraToMyPosition(googleMap);
 
             // Set a listener for marker click.
@@ -80,32 +82,25 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerClickLis
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_maps, container, false);
-
+        binding = FragmentMapsBinding.inflate(getLayoutInflater());
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
-        btnPosition = view.findViewById(R.id.floating_action_button);
-        progressBar = view.findViewById(R.id.progressBar);
 
         mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(getContext())).get(MapsViewModel.class);
-        mViewModel.init();
+
         mViewModel.getRestaurants().observe(getViewLifecycleOwner(), this::updateView);
-
-
     }
 
     private void updateView(List<Result> restaurants) {
-        progressBar.setVisibility(View.VISIBLE);
-        Log.e(TAG, "updateView: "+ restaurants.size());
-        if (restaurants != null && !restaurants.isEmpty()){
-            progressBar.setVisibility(View.GONE);
-            Log.e(TAG, "updateView: "+ restaurants.size());
+
+        if (restaurants != null){
+            binding.progressBar.setVisibility(View.GONE);
 
             if (mapFragment != null) {
                 mapFragment.getMapAsync(callback);
@@ -113,18 +108,30 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerClickLis
         }
     }
 
+    public BitmapDescriptor getMarkerIcon(String color) {
+        float[] hsv = new float[3];
+        Color.colorToHSV(Color.parseColor(color), hsv);
+        return BitmapDescriptorFactory.defaultMarker(hsv[0]);
+    }
 
     private void moveCameraToMyPosition(GoogleMap googleMap) {
 
-        LatLng myPosition = new LatLng(48.8650,2.3540);
+        LatLng myPosition = new LatLng(mViewModel.getLocation().getLatitude(),mViewModel.getLocation().getLongitude());
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPosition,14));
     }
 
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
-        /*Intent intent = new Intent(getContext(), DetailsActivity.class);
-        intent.putExtra("placeID", marker.getTag().toString());
-        startActivity(intent);*/
-        return false;
+        Log.e(TAG, "onMarkerClick: "+ marker.getTag() );
+        if (marker.getTag() != null){
+            startDetailsActivity(Objects.requireNonNull(mViewModel.getRestaurants().getValue()).get((int)marker.getTag()));
+        }
+        return true;
+    }
+
+    public void startDetailsActivity(Result restaurant){
+        Intent intent = new Intent(getContext(), DetailsActivity.class);
+        intent.putExtra("Restaurant", (Serializable) restaurant);
+        startActivity(intent);
     }
 }

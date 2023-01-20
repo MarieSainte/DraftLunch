@@ -24,4 +24,10 @@
     <string name="googleAPI">AIzaSyBQ4HmnvZGf8vwh-IvdUe8cCUsNENidYTo</string>
     <string name="Open_now">Ouvert</string>
     <string name="Close">Fermé</string>
+    <string name="joining"> a rejoint!</string>
+    <string name="popup_message_choice_yes">Oui</string>
+    <string name="popup_message_confirmation_delete_account">Etes vous sure de vouloir supprimer votre compte ?</string>
+    <string name="popup_message_choice_no">Non</string>
+    <string name="Hungry">J\'ai faim!</string>
+    <string name="AvailableWorkmates">Collègues disponibles</string>
 </resources>

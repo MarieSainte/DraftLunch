@@ -16,28 +16,13 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            app:popupTheme="@style/Theme.DraftLunch.PopupOverlay">
+            android:background="@color/colorPrimary">
 
         </androidx.appcompat.widget.Toolbar>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginHorizontal="50dp">
-
-            <fragment
-                android:id="@+id/autoComplete"
-                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-        </androidx.cardview.widget.CardView>
-
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_lunch"></include>
+    <include layout="@layout/content_lunch" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavViewMenu"
@@ -48,7 +33,5 @@
         app:elevation="12dp"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
         app:menu="@menu/bottom_nav_menu" />
-
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

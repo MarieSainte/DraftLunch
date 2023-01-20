@@ -21,7 +21,6 @@ import java.util.List;
 
 public class WorkmatesFragment extends Fragment {
 
-    private WorkmatesViewModel mViewModel;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     public static WorkmatesFragment newInstance() {
@@ -34,7 +33,6 @@ public class WorkmatesFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_workmates, container, false);
     }
 
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -42,33 +40,21 @@ public class WorkmatesFragment extends Fragment {
         recyclerView = view.findViewById(R.id.workmates_recyclerview);
         progressBar = view.findViewById(R.id.progressBar);
 
-        mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(getContext())).get(WorkmatesViewModel.class);
+        WorkmatesViewModel mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(getContext())).get(WorkmatesViewModel.class);
         mViewModel.init();
         mViewModel.getUsers().observe(getViewLifecycleOwner(), this::updateView);
-
-
-
-
     }
 
     private void updateView(List<User> users) {
-        if (users!=null && !users.isEmpty()){
+        if (users!=null){
+
             progressBar.setVisibility(View.GONE);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerView.setHasFixedSize(true);
-            WorkmatesAdapter workmatesAdapter = new WorkmatesAdapter(getContext(), (List<User>) users);
+            WorkmatesAdapter workmatesAdapter = new WorkmatesAdapter(getContext(),  users);
             recyclerView.setAdapter(workmatesAdapter);
-            workmatesAdapter.notifyDataSetChanged();
         }else{
             progressBar.setVisibility(View.VISIBLE);
         }
     }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-    }
-
-
 }

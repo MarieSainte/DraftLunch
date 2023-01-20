@@ -31,6 +31,5 @@ public interface RetrofitService {
             .baseUrl("https://maps.googleapis.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .client(RestaurantRepository.getHttpClient())
             .build();
 }

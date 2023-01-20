@@ -11,28 +11,28 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.R;
-import com.draft.draftlunch.Services.RestaurantRepository;
 import com.draft.draftlunch.ui.details.DetailsActivity;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
 
 
-    private Context context;
-    private List<Result> restaurants;
-    private RestaurantRepository restaurantRepository;
-    private Location location = new Location("location");
-    private Location destination = new Location("destination");
-    private int rate;
-    private String photoURL;
+    protected final Context context;
+    protected final MutableLiveData<List<Result>> restaurants;
+    protected final Location location = new Location("location");
+    protected final Location destination = new Location("destination");
+    protected String photoURL;
 
-    public ListAdapter(Context context,List<Result> restaurants, Location location ) {
+    public ListAdapter(Context context, MutableLiveData<List<Result>> restaurants, Location location ) {
         this.context = context;
         this.restaurants = restaurants;
 
@@ -50,16 +50,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder holder, int position) {
 
-        Result restaurant = restaurants.get(position);
+        Result restaurant = Objects.requireNonNull(restaurants.getValue()).get(position);
         String photoRef="";
         holder.item.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetailsActivity.class);
-            intent.putExtra("PlaceID", restaurant.getPlaceId());
-            intent.putExtra("Name", restaurant.getName());
-            intent.putExtra("Address", restaurant.getVicinity());
-            intent.putExtra("Rate", restaurant.getRating());
-
-            intent.putExtra("photo_URL", restaurant.getPhotos().get(0).getPhotoReference());
+            intent.putExtra("Restaurant", (Serializable) restaurant);
             context.startActivity(intent);
         });
 
@@ -86,7 +81,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
                         .into(holder.img_photo);
             }
 
-        }catch (Exception e){
+        }catch (Exception ignored){
 
         }
 
@@ -101,20 +96,19 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
 
         holder.tv_name.setText(restaurant.getName());
-
         holder.tv_type.setVisibility(View.GONE);
         holder.tv_address.setText(restaurant.getVicinity());
 
 
         destination.setLatitude(restaurant.getGeometry().getLocation().getLat());
         destination.setLongitude(restaurant.getGeometry().getLocation().getLng());
-        String metre = String.valueOf((int)location.distanceTo(destination));
+        String metre = String.valueOf((int)location.distanceTo(destination)/1000);
         holder.tv_metre.setText(metre + " m");
 
         // SETTING OPENING
         if (restaurant.getOpeningHours().getOpenNow()){
             holder.tv_opening.setText(R.string.Open_now);
-        }else if (! restaurant.getOpeningHours().getOpenNow()){
+        }else if (!restaurant.getOpeningHours().getOpenNow()){
             holder.tv_opening.setText(R.string.Close);
         }else {
             holder.tv_opening.setVisibility(View.INVISIBLE);
@@ -122,18 +116,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
         // SETTING STARS FOR RATING
         if (restaurant.getRating() > 0.5){
-            rate = 1;
             holder.img_rate_first.setVisibility(View.VISIBLE);
             if (restaurant.getRating() > 1.5){
-                rate = 2;
                 holder.img_rate_second.setVisibility(View.VISIBLE);
             }
                 if (restaurant.getRating() > 2.5){
-                    rate = 3;
                     holder.img_rate_third.setVisibility(View.VISIBLE);
                 }
         }else{
-            rate = 0;
             holder.img_rate_first.setVisibility(View.INVISIBLE);
             holder.img_rate_second.setVisibility(View.INVISIBLE);
             holder.img_rate_third.setVisibility(View.INVISIBLE);
@@ -143,23 +133,23 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
     @Override
     public int getItemCount() {
-        return restaurants.size();
+        return Objects.requireNonNull(restaurants.getValue()).size();
     }
 
     public static class ListViewHolder extends RecyclerView.ViewHolder{
 
-        ImageView img_photo;
-        ImageView img_person;
-        ImageView img_rate_first;
-        ImageView img_rate_second;
-        ImageView img_rate_third;
-        TextView tv_name;
-        TextView tv_metre;
-        TextView tv_type;
-        TextView tv_address;
-        TextView tv_joining;
-        TextView tv_opening;
-        ConstraintLayout item;
+        final ImageView img_photo;
+        final ImageView img_person;
+        final ImageView img_rate_first;
+        final ImageView img_rate_second;
+        final ImageView img_rate_third;
+        final TextView tv_name;
+        final TextView tv_metre;
+        final TextView tv_type;
+        final TextView tv_address;
+        final TextView tv_joining;
+        final TextView tv_opening;
+        final ConstraintLayout item;
 
         public ListViewHolder(@NonNull View itemView) {
             super(itemView);

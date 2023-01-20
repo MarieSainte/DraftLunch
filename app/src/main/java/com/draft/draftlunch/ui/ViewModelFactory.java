@@ -13,7 +13,7 @@ import com.draft.draftlunch.ui.list.ListViewModel;
 import com.draft.draftlunch.ui.lunch.LunchViewModel;
 import com.draft.draftlunch.ui.main.MainViewModel;
 import com.draft.draftlunch.ui.map.MapsViewModel;
-import com.draft.draftlunch.ui.message.MessageViewModel;
+import com.draft.draftlunch.ui.message.ChatViewModel;
 import com.draft.draftlunch.ui.settings.SettingsViewModel;
 import com.draft.draftlunch.ui.workmates.WorkmatesViewModel;
 
@@ -29,7 +29,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory{
     private final RestaurantRepository restaurantSource;
     private final ChatRepository chatSource;
     private final Executor executor;
-    private static ViewModelFactory factory;
+    private static volatile ViewModelFactory factory;
 
     public static ViewModelFactory getInstance(Context context) {
 
@@ -84,8 +84,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory{
             return (T) new SettingsViewModel(userSource, restaurantSource, executor);
         }
 
-        if (modelClass.isAssignableFrom(MessageViewModel.class)) {
-            return (T) new MessageViewModel(userSource, chatSource, executor);
+        if (modelClass.isAssignableFrom(ChatViewModel.class)) {
+            return (T) new ChatViewModel(userSource, chatSource, executor);
         }
 
         throw new IllegalArgumentException("Unknown ViewModel class");

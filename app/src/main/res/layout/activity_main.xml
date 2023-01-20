@@ -26,9 +26,9 @@
     <ImageView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:srcCompat="@drawable/meal_v3_final"
-        app:layout_constraintStart_toStartOf="@+id/btn_connexion"
-        app:layout_constraintEnd_toEndOf="@+id/btn_connexion"
+        android:src="@drawable/meal_v3_final"
+        app:layout_constraintStart_toStartOf="@id/btn_connexion"
+        app:layout_constraintEnd_toEndOf="@id/btn_connexion"
         app:layout_constraintTop_toTopOf="@id/guideline_high"
         app:layout_constraintBottom_toBottomOf="@id/guideline_high"
         />

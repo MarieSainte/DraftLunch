@@ -2,6 +2,7 @@ package com.draft.draftlunch.ui.workmates;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.draft.draftlunch.Models.User;
 import com.draft.draftlunch.R;
-import com.draft.draftlunch.ui.message.MessageActivity;
+import com.draft.draftlunch.ui.message.ChatActivity;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.WorkmatesViewHolder>{
 
-    Context context;
-    List<User> users;
+    final Context context;
+    final List<User> users;
 
     public WorkmatesAdapter(Context context, List<User> users) {
         this.context = context;
@@ -42,8 +44,8 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
         User user = users.get(position);
 
         holder.item.setOnClickListener(v -> {
-            Intent intent = new Intent(context, MessageActivity.class);
-            intent.putExtra("urlPicture", user.getUrlPicture());
+            Intent intent = new Intent(context, ChatActivity.class);
+            intent.putExtra("User", (Serializable) user);
             intent.putExtra("Name", user.getUsername());
             context.startActivity(intent);
         });
@@ -56,10 +58,12 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
 
 
 
-        if(user.getReservation()!=null){
-            holder.tv_status.setText(user.getUsername()+" is eating at " + user.getReservation());
+        if(user.getReservation()==null || user.getReservation().isEmpty()){
+            holder.tv_status.setText(String.format("%s hasn't decided yet", user.getUsername()));
+            holder.tv_status.setTextColor(Color.GRAY);
         }else{
-            holder.tv_status.setText(user.getUsername()+" hasn't decided yet");
+            holder.tv_status.setText(String.format("%s is eating at %s", user.getUsername(), user.getReservation()));
+            holder.tv_status.setTextColor(Color.BLACK);
         }
     }
 
@@ -68,11 +72,11 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
         return users.size();
     }
 
-    public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
+    public static class WorkmatesViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView img_photo;
-        TextView tv_status;
-        ConstraintLayout item;
+        final ImageView img_photo;
+        final TextView tv_status;
+        final ConstraintLayout item;
 
         public WorkmatesViewHolder(@NonNull View itemView) {
             super(itemView);

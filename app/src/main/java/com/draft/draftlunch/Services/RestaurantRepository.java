@@ -2,13 +2,15 @@ package com.draft.draftlunch.Services;
 
 import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.draft.draftlunch.Models.DetailRestaurant;
 import com.draft.draftlunch.Models.Nearby;
 import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.Models.ResultDetail;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -24,11 +26,10 @@ public class RestaurantRepository {
     //  DATA
 
     private static volatile RestaurantRepository instance;
-    private static UserRepository userRepository = UserRepository.getInstance();
+    private static final UserRepository userRepository = UserRepository.getInstance();
     private static Disposable disposable;
-    private static List<Result> myRestaurants = new ArrayList<>();
+    private static final MutableLiveData<List<Result>> myRestaurants = new MutableLiveData<>();
     public static ResultDetail detailRestaurant;
-
 
     // CONSTRUCTOR
 
@@ -47,13 +48,12 @@ public class RestaurantRepository {
         }
     }
 
-    // HTTP FOR TESTS
+    // OkHTTP FOR TESTS
 
     public static OkHttpClient getHttpClient(){
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-        return client;
+        return new OkHttpClient.Builder().addInterceptor(interceptor).build();
     }
 
     // FETCH RESTAURANTS NEARBY
@@ -63,7 +63,9 @@ public class RestaurantRepository {
 
             @Override
             public void onNext(Nearby restaurants) {
+
                 setMyRestaurants(restaurants.getResults());
+                //setMyRestaurants(userRepository.CrossDataUsersAndRestaurant(getMyRestaurants()));
             }
 
             @Override
@@ -73,7 +75,7 @@ public class RestaurantRepository {
 
             @Override
             public void onComplete() {
-                //userRepository.CrossDataUsersAndRestaurant(getMyRestaurants());
+                setMyRestaurants(userRepository.CrossDataUsersAndRestaurant(getMyRestaurants()));
             }
         });
     }
@@ -94,18 +96,13 @@ public class RestaurantRepository {
             @Override
             public void onNext(DetailRestaurant detailRestaurant) {
                 setDetailRestaurant(detailRestaurant.getResultDetail());
-
             }
 
             @Override
-            public void onError(Throwable e) {
-
-            }
+            public void onError(Throwable e) {}
 
             @Override
-            public void onComplete() {
-
-            }
+            public void onComplete() {}
         });
     }
 
@@ -119,10 +116,10 @@ public class RestaurantRepository {
 
     // GETTER AND SETTER
 
-    public static List<Result> getMyRestaurants() {return myRestaurants;}
+    public static MutableLiveData<List<Result>> getMyRestaurants() {return myRestaurants;}
 
     public static void setMyRestaurants(List<Result> myRestaurants) {
-        RestaurantRepository.myRestaurants = myRestaurants;
+        RestaurantRepository.myRestaurants.setValue(myRestaurants);
     }
 
     public static ResultDetail getDetailRestaurant() {
@@ -131,5 +128,14 @@ public class RestaurantRepository {
 
     public static void setDetailRestaurant(ResultDetail detailRestaurant) {
         RestaurantRepository.detailRestaurant = detailRestaurant;
+    }
+
+    public String getAddressRestaurant(String name){
+        for(int i = 0; i < Objects.requireNonNull(myRestaurants.getValue()).size(); i++){
+            if (myRestaurants.getValue().get(i).getName().equals(name)){
+                return myRestaurants.getValue().get(i).getVicinity();
+            }
+        }
+        return null;
     }
 }

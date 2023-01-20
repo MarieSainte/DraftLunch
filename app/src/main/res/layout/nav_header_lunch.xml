@@ -29,8 +29,8 @@
 
     <ImageView
         android:id="@+id/img_profil"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:contentDescription="@string/nav_header_desc"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         app:circularflow_defaultRadius="150dp"
@@ -53,7 +53,7 @@
         app:layout_constraintStart_toEndOf="@id/img_profil"
         app:layout_constraintTop_toTopOf="@id/img_profil"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="10dp"
+
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView

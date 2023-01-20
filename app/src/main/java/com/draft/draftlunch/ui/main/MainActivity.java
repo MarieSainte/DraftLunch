@@ -1,8 +1,6 @@
 package com.draft.draftlunch.ui.main;
 
 
-import static android.content.ContentValues.TAG;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -39,8 +37,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private ActivityMainBinding binding;
     private MainViewModel mViewModel;
     private FusedLocationProviderClient fusedLocationProviderClient;
-    private Location location = new Location("location");
+    private final Location location = new Location("location");
 
+    /*
+     * TODO: SIGN IN WITH GOOGLE        - A Refaire
+     * TODO: TEST UI & TEST LOGIC       - A Faire
+     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private void configureViewModel() {
 
         this.mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(MainViewModel.class);
-        this.mViewModel.init();
 
     }
 
@@ -80,9 +81,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         //Login Button
         binding.btnConnexion.setOnClickListener(v -> startSignInActivity());
 
-        binding.btnStart.setOnClickListener(v -> {
-            startActivity(new Intent(this, LunchActivity.class));
-        });
+        binding.btnStart.setOnClickListener(v -> startActivity(new Intent(this, LunchActivity.class)));
     }
 
     //-----------------
@@ -95,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         List<AuthUI.IdpConfig> providers =
                 Arrays.asList(
                         new AuthUI.IdpConfig.EmailBuilder().build(),
+                        new AuthUI.IdpConfig.FacebookBuilder().build(),
                         new AuthUI.IdpConfig.GoogleBuilder().build());
 
         // Launch the activity
@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             // SUCCESS
             if (resultCode == RESULT_OK) {
                 mViewModel.createUser();
+                startActivity(new Intent(this, LunchActivity.class));
             } else {
                 // ERRORS
                 if (response == null) {
@@ -145,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     //-----------------
-    // ASK FOR ACCESS TO THE LOCALISATION
+    // ASK FOR ACCESS THE LOCALISATION
     //-----------------
 
     @SuppressLint("MissingPermission")
@@ -174,10 +175,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         //location.setLatitude(lat);
         //location.setLongitude(lng);
 
-        location.setLatitude(48.8650);
-        location.setLongitude(2.3540);
+        location.setLatitude(48.8630);
+        location.setLongitude(2.3320);
         mViewModel.setLocation(location);
-        Log.e(TAG, "setLocation with: " + location.getLatitude() );
     }
 
     @Override
@@ -195,17 +195,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             if (location != null){
 
                 setLocation(location.getLatitude(),location.getLongitude());
-
             }else{
                 Log.e("TAG", " Permission granted BUT LOCATION = NULL");
-
             }
         });
     }
 
     @Override
-    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-
-    }
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {}
 
 }

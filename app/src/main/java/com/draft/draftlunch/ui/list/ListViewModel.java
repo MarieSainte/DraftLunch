@@ -2,7 +2,6 @@ package com.draft.draftlunch.ui.list;
 
 import android.location.Location;
 
-import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -19,29 +18,13 @@ public class ListViewModel extends ViewModel {
 
     private final UserRepository userSource;
 
-    private final RestaurantRepository restaurantSource;
-
-    private final Executor executor;
-
     // DATA
-    @Nullable
-    private MutableLiveData<List<Result>> restaurants ;
+
 
     // CONSTRUCTOR
 
     public ListViewModel(UserRepository userSource, RestaurantRepository restaurantSource, Executor executor) {
         this.userSource = userSource;
-        this.restaurantSource = restaurantSource;
-        this.executor = executor;
-        restaurants = new MutableLiveData<List<Result>>(){} ;
-    }
-
-    public void init() {
-
-        if (this.restaurants != null) {
-            return;
-        }
-        restaurants.setValue(restaurantSource.getMyRestaurants());
     }
 
     // -------------
@@ -56,7 +39,7 @@ public class ListViewModel extends ViewModel {
     // FOR RESTAURANT
     // -------------
 
-    public MutableLiveData<List<Result>> getRestaurants() { return this.restaurants; }
-
-
+    public MutableLiveData<List<Result>> getRestaurants() {
+        return RestaurantRepository.getMyRestaurants();
+    }
 }
