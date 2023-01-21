@@ -1,5 +1,9 @@
 package com.draft.draftlunch.ui.details;
 
+import static android.content.ContentValues.TAG;
+
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -44,8 +48,24 @@ public class DetailsViewModel extends ViewModel {
 
     public MutableLiveData<User> getUser(){
         //user.setValue(userSource.getUserData().continueWith(task -> task.getResult().toObject(User.class)).getResult());
-        user.setValue(userSource.getUserData().getResult().toObject(User.class));
+
         return this.user;
+    }
+
+    public boolean getReservation(String restaurant){
+        userSource.fetchUserData();
+        Log.e(TAG, "getReservation: "+ restaurant );
+        Log.e(TAG, "getReservation: "+ UserRepository.getMyUser().getReservation());
+        if(UserRepository.getMyUser() != null){
+            return restaurant.equals(UserRepository.getMyUser().getReservation());
+        }
+        return false;
+    }
+
+    public boolean getFavoriteRestaurant(String restaurant){
+        String Favorite = userSource.getUserData().getResult().getString("likedRestaurant");
+
+        return false;
     }
 
     // ADD THIS RESTAURANT TO THE FAVORITE LIST IN FIRESTORE

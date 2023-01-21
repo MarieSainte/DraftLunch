@@ -1,6 +1,7 @@
 package com.draft.draftlunch.ui.lunch;
 
 import android.content.Context;
+import android.location.Location;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModel;
@@ -33,6 +34,7 @@ public class LunchViewModel extends ViewModel {
 
         userSource.fetchUsers();
         user = userSource.getCurrentUser();
+        userSource.fetchUserData();
     }
 
     // -------------
@@ -42,7 +44,9 @@ public class LunchViewModel extends ViewModel {
     public Task<Void> signOut(Context context){
         return userSource.signOut(context);
     }
-
+    public Location getLocation() {
+        return userSource.getLocation();
+    }
 
     public FirebaseUser getCurrentUser() { return this.user; }
 

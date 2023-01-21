@@ -1,5 +1,6 @@
 package com.draft.draftlunch.ui.list;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -19,7 +20,6 @@ import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.R;
 import com.draft.draftlunch.ui.details.DetailsActivity;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,6 +47,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         return new ListViewHolder(v);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder holder, int position) {
 
@@ -54,7 +55,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         String photoRef="";
         holder.item.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetailsActivity.class);
-            intent.putExtra("Restaurant", (Serializable) restaurant);
+            intent.putExtra("Restaurant", restaurant);
             context.startActivity(intent);
         });
 

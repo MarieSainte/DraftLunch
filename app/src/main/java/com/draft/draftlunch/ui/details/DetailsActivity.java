@@ -31,7 +31,6 @@ public class DetailsActivity extends AppCompatActivity {
     protected List<User> users;
     Result restaurant = new Result();
 
-    //TODO: CHECK DETAILS
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,28 +43,20 @@ public class DetailsActivity extends AppCompatActivity {
 
         setupListener();
         setupRecyclerView();
-        mViewModel.getUser().observe(this, this::updateView);
+        updateView();
     }
 
-    private void updateView(User user) {
+    private void updateView() {
 
         binding.tvName.setText(restaurant.getName());
         binding.tvAddress.setText(restaurant.getVicinity());
 
-//        if (user.getRestaurantLiked() != null){
-//            for( int i = 0; i < user.getRestaurantLiked().size(); i++){
-//
-//                if (user.getRestaurantLiked().get(i).equals(restaurant.getName())){
-//
-//                    liked = true;
-//                    binding.starToLike.setImageTintList(AppCompatResources.getColorStateList(this, R.color.yellow));
-//                }
-//            }
+//        if (liked){
+//            binding.starToLike.setImageTintList(AppCompatResources.getColorStateList(this, R.color.yellow));
 //        }
-//        if (user.getReservation().equals(restaurant.getName())){
-//            hasReserved = true;
-//            binding.btnReserved.setImageTintList(AppCompatResources.getColorStateList(this, R.color.green));
-//        }
+        if (hasReserved){
+            binding.btnReserved.setImageTintList(AppCompatResources.getColorStateList(this, R.color.green));
+        }
 
         // SETUP THE RESTAURANT IMAGE
         String photoRef = restaurant.getPhotos().get(0).getPhotoReference();
@@ -119,6 +110,8 @@ public class DetailsActivity extends AppCompatActivity {
         this.mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(DetailsViewModel.class);
         this.mViewModel.init(restaurant.getPlaceId(),restaurant.getName());
         users = mViewModel.getJoiningUsers();
+        //liked = mViewModel.getFavoriteRestaurant(restaurant.getName());
+        hasReserved = mViewModel.getReservation(restaurant.getName());
     }
 
     private void setupListener() {

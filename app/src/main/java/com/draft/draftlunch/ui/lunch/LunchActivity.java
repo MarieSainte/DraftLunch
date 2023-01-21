@@ -39,6 +39,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class LunchActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -48,12 +49,10 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     protected ImageView img_profil;
     private TextView tv_name;
     private TextView tv_email;
-
+    private double lat,lng;
     /*
      * TODO: DELETE                     - Problem: RULES IN FIRESTORE
-     * TODO: GET USER DATA              - Error: TASK IS NOT YET COMPLETED
-     * TODO: CHECK CROSS DATA           - CHECK
-     * TODO: AUTOCOMPLETE               - Problem: GOOGLE API Auth
+     * TODO: GET USER DATA              - Error: Task is not yet complete
      */
 
     @Override
@@ -72,7 +71,7 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
         img_profil = headerView.findViewById(R.id.img_profil);
 
         if(!Places.isInitialized()){
-            Places.initialize(getApplicationContext(),getString(R.string.google_api_key));
+            Places.initialize(getApplicationContext(),"AIzaSyBQ4HmnvZGf8vwh-IvdUe8cCUsNENidYTo");
         }
 
         // Set a Toolbar to replace the ActionBar.
@@ -99,6 +98,8 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     private void configureViewModel() {
         this.mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(LunchViewModel.class);
         this.mViewModel.init();
+        lat = mViewModel.getLocation().getLatitude();
+        lng = mViewModel.getLocation().getLongitude();
     }
 
     //----------------
@@ -165,16 +166,16 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     //---------------
     public void startAutocompleteActivity(){
         PlacesClient placesClient = Places.createClient(this);
+
         Intent intent = new Autocomplete.IntentBuilder(
                 AutocompleteActivityMode.OVERLAY,
                 Arrays.asList(Place.Field.ID, Place.Field.NAME))
+                .setTypesFilter(Collections.singletonList("restaurant"))
                 .setLocationBias(RectangularBounds.newInstance(
-                      new LatLng(48.8630,2.3320),
-                      new LatLng(48.8650,2.3540)))
-                .setCountry("FR")
+                      new LatLng(lat-0.0010,lng-0.0010),
+                      new LatLng(lat+0.0010,lng+0.0010)))
                 .build(this);
         startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
-
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -183,9 +184,10 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
         if(requestCode == AUTOCOMPLETE_REQUEST_CODE){
             if(resultCode == RESULT_OK){
                 Place place = Autocomplete.getPlaceFromIntent(data);
-
+                Log.e(TAG, "onActivityResult: OK "+place.getName()+" "+place.getId());
             }else if (resultCode == AutocompleteActivity.RESULT_ERROR){
                 Status status = Autocomplete.getStatusFromIntent(data);
+                Log.e(TAG, "onActivityResult: CANCELED "+status);
             }else if (resultCode == RESULT_CANCELED){
                 Log.e(TAG, "onActivityResult: CANCELED " );
             }

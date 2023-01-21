@@ -40,6 +40,7 @@ public class UserRepository {
     private static final List<User> users = new ArrayList<>();
     private static Location location = new Location("location");
     private static String userId;
+    private static User myUser;
     public UserRepository() { }
 
     public static UserRepository getInstance() {
@@ -116,10 +117,10 @@ public class UserRepository {
         }
     }
     // Get User's favorite Restaurant from Firestore
-    public Task<DocumentSnapshot> getlikedRestaurant(){
+    public String getlikedRestaurant(){
         String uid = this.getCurrentUserUID();
         if(uid != null){
-            return this.getUsersCollection().document(uid).get(Source.valueOf(RESTAURANT_LIKED_FIELD));
+            return (String) this.getUsersCollection().document(uid).get().getResult().get(RESTAURANT_LIKED_FIELD);
         }else{
             return null;
         }
@@ -177,6 +178,25 @@ public class UserRepository {
         }).addOnSuccessListener(aVoid -> RestaurantRepository.FetchRestaurants(getLocation().getLatitude() + "," + getLocation().getLongitude()));
     }
 
+    public void fetchUserData(){
+        String uid = this.getCurrentUserUID();
+        getUsersCollection()
+                .document(uid)
+                .get()
+                .addOnCompleteListener(task -> {
+
+                    if (task.isSuccessful() && task.getResult()!=null){
+
+                        myUser = new User();
+                        myUser.setUsername(task.getResult().getString(USERNAME_FIELD));
+                        myUser.setUrlPicture(task.getResult().getString(PICTURE_FIELD));
+                        myUser.setReservation(task.getResult().getString(RESERVATION_FIELD));
+                        myUser.setUid(task.getResult().getString(ID_FIELD));
+                            //user.setRestaurantLiked(task.getResult().getString());
+
+                    }
+                });
+    }
     // Set a reservation in Firestore
     public void addReservation(String reservation) {
         String uid = this.getCurrentUserUID();
@@ -196,13 +216,12 @@ public class UserRepository {
     }
 
     public List<Result> CrossDataUsersAndRestaurant(MutableLiveData<List<Result>> allRestaurants){
-        if (liveUsers.getValue() != null){
+        if (liveUsers.getValue() != null&& !Objects.requireNonNull(liveUsers.getValue()).isEmpty()){
             for(int i = 0 ; i < liveUsers.getValue().size() ; i++){
-                if(allRestaurants != null){
-                    for(int y = 0; y < Objects.requireNonNull(allRestaurants.getValue()).size() ; y++){
+                if(allRestaurants != null && !Objects.requireNonNull(allRestaurants.getValue()).isEmpty()){
+                    for(int y = 0; y < allRestaurants.getValue().size() ; y++){
                         if (liveUsers.getValue().get(i).getReservation().equals(allRestaurants.getValue().get(y).getName())){
-                            Log.e(TAG, "LOOP : " + liveUsers.getValue().get(i).getUsername() + " -- " + allRestaurants.getValue().get(y).getName() );
-                            allRestaurants.getValue().get(i).addHasBeenReservedBy(liveUsers.getValue().get(i));
+                            allRestaurants.getValue().get(y).addHasBeenReservedBy(liveUsers.getValue().get(i));
                         }
                     }
                 }
@@ -243,5 +262,9 @@ public class UserRepository {
 
     public static void setLiveUsers(List<User> users) {
         liveUsers.setValue(users);
+    }
+
+    public static User getMyUser() {
+        return myUser;
     }
 }
