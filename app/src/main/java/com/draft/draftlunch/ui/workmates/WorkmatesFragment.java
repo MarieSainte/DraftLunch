@@ -41,7 +41,7 @@ public class WorkmatesFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressBar);
 
         WorkmatesViewModel mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(getContext())).get(WorkmatesViewModel.class);
-        mViewModel.init();
+
         mViewModel.getUsers().observe(getViewLifecycleOwner(), this::updateView);
     }
 

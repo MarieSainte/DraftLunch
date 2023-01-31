@@ -26,7 +26,6 @@ public class NotificationsService extends FirebaseMessagingService {
 
     private final UserRepository userRepository = UserRepository.getInstance();
     private final RestaurantRepository restaurantRepository = RestaurantRepository.getInstance();
-    private User user;
     protected List<User> joiningUsers = new ArrayList<>();
     protected String address;
 
@@ -36,11 +35,12 @@ public class NotificationsService extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null) {
             // Get message sent by Firebase
             RemoteMessage.Notification notification = remoteMessage.getNotification();
-            getRestaurantData();
             getUserData();
+            getRestaurantData();
+
 
             try{
-                if(user.getReservation()!=null && !user.getReservation().isEmpty()){
+                if(UserRepository.getMyUser().getReservation()!=null && !UserRepository.getMyUser().getReservation().isEmpty() && UserRepository.getMyUser().isNotification()){
                     sendVisualNotification(notification);
                 }
             }catch(Exception ignored){}
@@ -48,12 +48,12 @@ public class NotificationsService extends FirebaseMessagingService {
     }
 
     private void getRestaurantData() {
-        joiningUsers = userRepository.getJoiningUsers(user.getReservation());
-        address = restaurantRepository.getAddressRestaurant(user.getReservation());
+        joiningUsers = userRepository.getJoiningUsers(UserRepository.getMyUser().getReservation());
+        address = RestaurantRepository.getAddressRestaurant(UserRepository.getMyUser().getReservation());
     }
 
     private void getUserData(){
-        user = userRepository.getUserData().continueWith(documentSnapshot -> documentSnapshot.getResult().toObject(User.class)).getResult() ;
+        userRepository.fetchUserData();
     }
 
     private void sendVisualNotification(RemoteMessage.Notification notification) {
@@ -71,7 +71,7 @@ public class NotificationsService extends FirebaseMessagingService {
                 new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.drawable.ic_logo_menu)
                         .setContentTitle(notification.getTitle())
-                        .setContentText(notification.getBody()+" at " + user.getReservation() + " located " + address +" with " + joiningUsers)
+                        .setContentText(notification.getBody()+" at " + UserRepository.getMyUser().getReservation() + " located " + address +" with " + joiningUsers)
                         .setAutoCancel(true)
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                         .setContentIntent(pendingIntent);

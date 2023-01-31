@@ -5,11 +5,8 @@ import android.location.Location;
 import androidx.lifecycle.ViewModel;
 
 import com.draft.draftlunch.Models.User;
-import com.draft.draftlunch.Services.RestaurantRepository;
 import com.draft.draftlunch.Services.UserRepository;
 import com.google.android.gms.tasks.Task;
-
-import java.util.concurrent.Executor;
 
 public class MainViewModel extends ViewModel {
 
@@ -22,7 +19,7 @@ public class MainViewModel extends ViewModel {
 
     // CONSTRUCTOR
 
-    public MainViewModel(UserRepository userSource, RestaurantRepository restaurantSource, Executor executor) {
+    public MainViewModel(UserRepository userSource) {
         this.userSource = userSource;
     }
 
@@ -31,7 +28,7 @@ public class MainViewModel extends ViewModel {
     // -------------
 
     public void createUser(){userSource.createUser();}
-    public void fetchUsers(){userSource.fetchUsers();}
+
     public void setLocation(Location location) {
         userSource.setLocation(location);
     }

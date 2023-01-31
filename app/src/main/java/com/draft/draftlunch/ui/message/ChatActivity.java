@@ -66,7 +66,10 @@ public class ChatActivity extends AppCompatActivity {
                 binding.chatRecyclerView.setHasFixedSize(true);
                 chatAdapter.notifyItemRangeInserted(chatMessages.size(), chatMessages.size());
                 binding.chatRecyclerView.setAdapter(chatAdapter);
+                binding.chatRecyclerView.scrollToPosition(chatMessages.size()-1);
+
         }
+
     }
 
     private void loadReceiverDetails() {
@@ -75,7 +78,6 @@ public class ChatActivity extends AppCompatActivity {
 
     private void configureViewModel() {
         this.mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(ChatViewModel.class);
-        this.mViewModel.init();
     }
 
 }

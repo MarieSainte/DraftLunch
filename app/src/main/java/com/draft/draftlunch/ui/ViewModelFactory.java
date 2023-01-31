@@ -57,11 +57,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory{
     public <T extends ViewModel>  T create(Class<T> modelClass) {
 
         if (modelClass.isAssignableFrom(ListViewModel.class)) {
-            return (T) new ListViewModel(userSource, restaurantSource, executor);
+            return (T) new ListViewModel(userSource);
         }
 
         if (modelClass.isAssignableFrom(WorkmatesViewModel.class)) {
-            return (T) new WorkmatesViewModel(userSource, restaurantSource, executor);
+            return (T) new WorkmatesViewModel(userSource);
         }
 
         if (modelClass.isAssignableFrom(MapsViewModel.class)) {
@@ -69,11 +69,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory{
         }
 
         if (modelClass.isAssignableFrom(MainViewModel.class)) {
-            return (T) new MainViewModel(userSource, restaurantSource, executor);
+            return (T) new MainViewModel(userSource);
         }
 
         if (modelClass.isAssignableFrom(LunchViewModel.class)) {
-            return (T) new LunchViewModel(userSource, restaurantSource, executor);
+            return (T) new LunchViewModel(userSource);
         }
 
         if (modelClass.isAssignableFrom(DetailsViewModel.class)) {
@@ -81,11 +81,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory{
         }
 
         if (modelClass.isAssignableFrom(SettingsViewModel.class)) {
-            return (T) new SettingsViewModel(userSource, restaurantSource, executor);
+            return (T) new SettingsViewModel(userSource);
         }
 
         if (modelClass.isAssignableFrom(ChatViewModel.class)) {
-            return (T) new ChatViewModel(userSource, chatSource, executor);
+            return (T) new ChatViewModel(userSource, chatSource);
         }
 
         throw new IllegalArgumentException("Unknown ViewModel class");

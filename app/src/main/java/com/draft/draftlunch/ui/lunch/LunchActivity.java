@@ -23,15 +23,17 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.draft.draftlunch.Models.Result;
 import com.draft.draftlunch.R;
 import com.draft.draftlunch.databinding.ActivityLunchBinding;
 import com.draft.draftlunch.ui.ViewModelFactory;
+import com.draft.draftlunch.ui.details.DetailsActivity;
+import com.draft.draftlunch.ui.settings.SettingsActivity;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
@@ -50,10 +52,7 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     private TextView tv_name;
     private TextView tv_email;
     private double lat,lng;
-    /*
-     * TODO: DELETE                     - Problem: RULES IN FIRESTORE
-     * TODO: GET USER DATA              - Error: Task is not yet complete
-     */
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +76,7 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
         // Set a Toolbar to replace the ActionBar.
         setSupportActionBar(binding.appBarLunch.toolbar);
         // Find our drawer view
-        DrawerLayout drawer = binding.drawerLayout;
+        drawer = binding.drawerLayout;
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -125,6 +124,12 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     }
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId()==R.id.nav_map){
+            drawer.close();
+        }
+        if(item.getItemId()==R.id.nav_settings){
+            startActivity(new Intent(this, SettingsActivity.class));
+        }
         if(item.getItemId()==R.id.btnLogout){
             mViewModel.signOut(this);
             finish();
@@ -165,7 +170,6 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     // AUTOCOMPLETE
     //---------------
     public void startAutocompleteActivity(){
-        PlacesClient placesClient = Places.createClient(this);
 
         Intent intent = new Autocomplete.IntentBuilder(
                 AutocompleteActivityMode.OVERLAY,
@@ -184,7 +188,13 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
         if(requestCode == AUTOCOMPLETE_REQUEST_CODE){
             if(resultCode == RESULT_OK){
                 Place place = Autocomplete.getPlaceFromIntent(data);
-                Log.e(TAG, "onActivityResult: OK "+place.getName()+" "+place.getId());
+                Result restaurant = mViewModel.getSpecificRestaurant(place.getName());
+                if (restaurant != null){
+                    Intent intent = new Intent(this, DetailsActivity.class);
+                    intent.putExtra("Restaurant",restaurant);
+                    startActivity(intent);
+                }
+
             }else if (resultCode == AutocompleteActivity.RESULT_ERROR){
                 Status status = Autocomplete.getStatusFromIntent(data);
                 Log.e(TAG, "onActivityResult: CANCELED "+status);

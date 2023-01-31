@@ -10,7 +10,6 @@ import com.draft.draftlunch.Services.RestaurantRepository;
 import com.draft.draftlunch.Services.UserRepository;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 public class ListViewModel extends ViewModel {
 
@@ -23,7 +22,7 @@ public class ListViewModel extends ViewModel {
 
     // CONSTRUCTOR
 
-    public ListViewModel(UserRepository userSource, RestaurantRepository restaurantSource, Executor executor) {
+    public ListViewModel(UserRepository userSource) {
         this.userSource = userSource;
     }
 

@@ -28,18 +28,21 @@ public class User implements Serializable {
     @Expose
     @Nullable
     private String urlPicture;
-
+    @SerializedName("notification")
+    @Expose
+    private boolean notification;
 
     public User() {
     }
 
-    public User(String uid, String username, String email, @Nullable String urlPicture, String reservation, List<String> restaurantLiked) {
+    public User(String uid, String username, String email, @Nullable String urlPicture, String reservation, List<String> restaurantLiked, boolean notification) {
         this.uid = uid;
         this.username = username;
         this.email = email;
         this.urlPicture = urlPicture;
         this.reservation = reservation;
         this.restaurantLiked = restaurantLiked;
+        this.notification = notification;
     }
 
     public String getUid() {
@@ -89,5 +92,13 @@ public class User implements Serializable {
 
     public void setRestaurantLiked(List<String> restaurantLiked) {
         this.restaurantLiked = restaurantLiked;
+    }
+
+    public boolean isNotification() {
+        return notification;
+    }
+
+    public void setNotification(boolean notification) {
+        this.notification = notification;
     }
 }

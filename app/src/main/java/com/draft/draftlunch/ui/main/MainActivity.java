@@ -40,8 +40,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private final Location location = new Location("location");
 
     /*
-     * TODO: SIGN IN WITH GOOGLE        - A Refaire
-     * TODO: TEST UI & TEST LOGIC       - A Faire
+     * TODO: TEST UI & TEST LOGIC
      */
 
     @Override

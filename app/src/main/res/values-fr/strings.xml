@@ -30,4 +30,8 @@
     <string name="popup_message_choice_no">Non</string>
     <string name="Hungry">J\'ai faim!</string>
     <string name="AvailableWorkmates">Collègues disponibles</string>
+    <string name="no_phone">Aucun numéro de téléphone trouvé</string>
+    <string name="no_website">Aucun site web trouvé</string>
+    <string name="settings">Paramètres</string>
+    <string name="notification">Notification</string>
 </resources>

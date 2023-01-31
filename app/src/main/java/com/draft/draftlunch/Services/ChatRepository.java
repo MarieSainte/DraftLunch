@@ -1,5 +1,9 @@
 package com.draft.draftlunch.Services;
 
+import static android.content.ContentValues.TAG;
+
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 
 import com.draft.draftlunch.Models.ChatMessage;
@@ -24,8 +28,12 @@ public final class ChatRepository {
     private static final String CHAT_COLLECTION = "chats";
     private static volatile ChatRepository instance;
     private static final UserRepository userRepository = UserRepository.getInstance();
-
+    private static List<ChatMessage> chatMessageList ;
     private final MutableLiveData<List<ChatMessage>> chatMessages = new MutableLiveData<List<ChatMessage>>() {};
+
+    /*
+     *  TODO: CHAT
+     */
 
     public ChatRepository() { }
 
@@ -51,6 +59,7 @@ public final class ChatRepository {
     }
 
     public void listenMessage(String receivedId){
+        chatMessageList = new ArrayList<>();
         this.getChatCollection()
                 .whereEqualTo("SENDER_ID",userRepository.getCurrentUserUID())
                 .whereEqualTo("RECEIVED_ID",receivedId)
@@ -59,6 +68,7 @@ public final class ChatRepository {
                 .whereEqualTo("SENDER_ID",receivedId)
                 .whereEqualTo("RECEIVED_ID",userRepository.getCurrentUserUID())
                 .addSnapshotListener(eventListener);
+        Log.e(TAG, "listenMessage: " );
     }
 
     private final EventListener<QuerySnapshot> eventListener = (value, error) -> {
@@ -66,7 +76,7 @@ public final class ChatRepository {
             return;
         }
         if (value != null){
-            List<ChatMessage> chatMessageList = new ArrayList<>();
+
             for(DocumentChange documentChange : value.getDocumentChanges()){
                 if (documentChange.getType() == DocumentChange.Type.ADDED){
                     ChatMessage chatMessage = new ChatMessage();
@@ -75,8 +85,16 @@ public final class ChatRepository {
                     chatMessage.message = documentChange.getDocument().getString("INPUT_MESSAGE");
                     chatMessage.dataTime = getReadableTime(documentChange.getDocument().getDate("TIMESTAMP"));
                     chatMessage.dateObject = documentChange.getDocument().getDate("TIMESTAMP");
-                    chatMessageList.add(chatMessage);
-                    chatMessages.setValue(chatMessageList);
+
+                    if(chatMessageList.isEmpty()) {
+                        chatMessageList.add(chatMessage);
+                        chatMessages.setValue(chatMessageList);
+                    }if(chatMessageList.contains(chatMessage)){
+                        continue;
+                    }else{
+                        chatMessageList.add(chatMessage);
+                        chatMessages.setValue(chatMessageList);
+                    }
                 }
                 Collections.sort(Objects.requireNonNull(chatMessages.getValue()), (obj1, obj2) -> obj1.dateObject.compareTo(obj2.dateObject));
             }
@@ -84,7 +102,7 @@ public final class ChatRepository {
     };
 
     public String getReadableTime(Date date){
-        return new SimpleDateFormat("MMMM dd, yyyy - hh:mm a", Locale.getDefault()).format(date);
+        return new SimpleDateFormat("dd MMMM, yyyy - hh:mm a", Locale.getDefault()).format(date);
     }
 
     public MutableLiveData<List<ChatMessage>> getChatMessages() {

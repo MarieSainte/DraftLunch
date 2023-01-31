@@ -16,40 +16,41 @@
         app:layout_constraintTop_toTopOf="@id/title"
         android:layout_marginStart="16dp"
         android:src="@drawable/ic_baseline_arrow_back_24"
-        />
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Settings"
+        android:text="@string/settings"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="25dp"
-        android:textSize="20dp"/>
+        android:textSize="20sp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/Language"
+        android:text="@string/notification"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="@id/guideline_middle"
-        app:layout_constraintTop_toTopOf="@id/spinner_languages"
-        app:layout_constraintBottom_toBottomOf="@id/spinner_languages"
+        app:layout_constraintTop_toTopOf="@id/switchNotif"
+        app:layout_constraintBottom_toBottomOf="@id/switchNotif"
         android:layout_marginStart="15dp"
-        android:textSize="20dp"/>
-
-    <Spinner
-        android:id="@+id/spinner_languages"
+        android:textSize="20sp"/>
+    <Switch
+        android:id="@+id/switchNotif"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:checked="true"
         android:layout_marginTop="30dp"
-        android:dropDownWidth="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/guideline_middle"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        android:theme="@style/SwitchNotif"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     <Button
         android:id="@+id/btn_delete"
@@ -69,5 +70,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_begin="200dp" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

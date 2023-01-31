@@ -1,26 +1,24 @@
 package com.draft.draftlunch.ui.settings;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.util.Log;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.draft.draftlunch.R;
-import com.draft.draftlunch.Services.LangManager;
 import com.draft.draftlunch.databinding.ActivitySettingsBinding;
 import com.draft.draftlunch.ui.ViewModelFactory;
 import com.draft.draftlunch.ui.main.MainActivity;
 
-public class SettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class SettingsActivity extends AppCompatActivity  {
 
     private ActivitySettingsBinding binding ;
     private SettingsViewModel mViewModel;
-    private final LangManager langManager = new LangManager(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,13 +28,18 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
 
         configureViewModel();
         setupListeners();
-        setupSpinner();
+        updateView();
+    }
+
+    private void updateView() {
+        binding.switchNotif.setChecked(mViewModel.getMyUser().isNotification());
     }
 
     private void configureViewModel() {
 
         this.mViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(SettingsViewModel.class);
-
+        mViewModel.init();
+        Log.e(TAG, "configureViewModel: " + mViewModel.getMyUser() );
     }
 
     private void setupListeners() {
@@ -44,40 +47,18 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
                 .setMessage(R.string.popup_message_confirmation_delete_account)
                 .setPositiveButton(R.string.popup_message_choice_yes, (dialogInterface, i) ->
                         mViewModel.deleteUser(this)
-                                .addOnSuccessListener(aVoid -> {
+                                .addOnCompleteListener(aVoid -> {
                                     Intent intent = new Intent(this, MainActivity.class);
                                     startActivity(intent);
-                                        }
-                                )
+                                })
                 )
                 .setNegativeButton(R.string.popup_message_choice_no, null)
                 .show());
 
-        binding.spinnerLanguages.setOnItemSelectedListener(this);
+        binding.switchNotif.setOnClickListener(v ->{
+            mViewModel.notificationChecked(!mViewModel.getMyUser().isNotification());
+        });
 
         binding.backArrow.setOnClickListener(v-> onBackPressed());
-    }
-
-    private void setupSpinner(){
-        ArrayAdapter<CharSequence> spinner_adapter = ArrayAdapter.createFromResource(this,R.array.languages,
-                android.R.layout.simple_spinner_dropdown_item);
-        spinner_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinnerLanguages.setAdapter(spinner_adapter);
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if (position == 0) {
-
-            langManager.setLang("en");
-        }else if (position == 1) {
-
-            langManager.setLang("fr");
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
     }
 }

@@ -9,7 +9,6 @@ import com.draft.draftlunch.Services.UserRepository;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 public class ChatViewModel extends ViewModel {
     // REPOSITORIES
@@ -23,17 +22,13 @@ public class ChatViewModel extends ViewModel {
 
     // CONSTRUCTOR
 
-    public ChatViewModel(UserRepository userSource, ChatRepository chatSource, Executor executor) {
+    public ChatViewModel(UserRepository userSource, ChatRepository chatSource) {
         this.userSource = userSource;
         this.chatSource = chatSource;
     }
 
 
     public String getCurrentUserUID(){return userSource.getCurrentUserUID();}
-
-    public void init() {
-
-    }
 
     public void sentMessage(HashMap<String, Object> message) {
         chatSource.sentMessage(message);

@@ -18,8 +18,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 
 public class RestaurantRepository {
 
@@ -27,7 +25,7 @@ public class RestaurantRepository {
 
     private static volatile RestaurantRepository instance;
     private static final UserRepository userRepository = UserRepository.getInstance();
-    private static Disposable disposable;
+    protected static Disposable disposable;
     private static final MutableLiveData<List<Result>> myRestaurants = new MutableLiveData<>();
     public static ResultDetail detailRestaurant;
 
@@ -48,14 +46,6 @@ public class RestaurantRepository {
         }
     }
 
-    // OkHTTP FOR TESTS
-
-    public static OkHttpClient getHttpClient(){
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        return new OkHttpClient.Builder().addInterceptor(interceptor).build();
-    }
-
     // FETCH RESTAURANTS NEARBY
 
     public static void FetchRestaurants(String loc) {
@@ -65,7 +55,6 @@ public class RestaurantRepository {
             public void onNext(Nearby restaurants) {
 
                 setMyRestaurants(restaurants.getResults());
-                //setMyRestaurants(userRepository.CrossDataUsersAndRestaurant(getMyRestaurants()));
             }
 
             @Override
@@ -116,6 +105,24 @@ public class RestaurantRepository {
 
     // GETTER AND SETTER
 
+    public static Result getSpecificRestaurant(String name){
+        for(int i = 0; i < Objects.requireNonNull(myRestaurants.getValue()).size(); i++){
+            if (myRestaurants.getValue().get(i).getName().equals(name)){
+                return myRestaurants.getValue().get(i);
+            }
+        }
+        return null;
+    }
+
+    public static String getAddressRestaurant(String name){
+        for(int i = 0; i < Objects.requireNonNull(myRestaurants.getValue()).size(); i++){
+            if (myRestaurants.getValue().get(i).getName().equals(name)){
+                return myRestaurants.getValue().get(i).getVicinity();
+            }
+        }
+        return null;
+    }
+
     public static MutableLiveData<List<Result>> getMyRestaurants() {return myRestaurants;}
 
     public static void setMyRestaurants(List<Result> myRestaurants) {
@@ -128,14 +135,5 @@ public class RestaurantRepository {
 
     public static void setDetailRestaurant(ResultDetail detailRestaurant) {
         RestaurantRepository.detailRestaurant = detailRestaurant;
-    }
-
-    public String getAddressRestaurant(String name){
-        for(int i = 0; i < Objects.requireNonNull(myRestaurants.getValue()).size(); i++){
-            if (myRestaurants.getValue().get(i).getName().equals(name)){
-                return myRestaurants.getValue().get(i).getVicinity();
-            }
-        }
-        return null;
     }
 }
