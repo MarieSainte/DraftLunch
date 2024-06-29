@@ -49,7 +49,7 @@ public class RestaurantRepository {
     // FETCH RESTAURANTS NEARBY
 
     public static void FetchRestaurants(String loc) {
-        disposable = RestaurantRepository.streamFetchRestaurants(loc,4000,"restaurant","cruise","AIzaSyBQ4HmnvZGf8vwh-IvdUe8cCUsNENidYTo").subscribeWith(new DisposableObserver<Nearby>() {
+        disposable = RestaurantRepository.streamFetchRestaurants(loc,4000,"restaurant","cruise","AIaaSyBQ4HmnvZGf8vwh-IvdUe8cCUsNENidYTo").subscribeWith(new DisposableObserver<Nearby>() {
 
             @Override
             public void onNext(Nearby restaurants) {
